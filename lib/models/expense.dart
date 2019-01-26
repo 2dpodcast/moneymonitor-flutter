@@ -1,19 +1,27 @@
 import 'package:flutter/material.dart';
 
 class Expense {
-  final String title;
-  final String category;
-  final String amount;
-  final String createdAt;
-  final String note;
-  final String id;
+  String title;
+  String category;
+  String amount;
+  String createdAt;
+  String note;
+  String key;
 
   Expense({
     @required this.title,
     @required this.amount,
-    @required this.id,
+    @required this.key,
     @required this.createdAt,
     this.category = "",
     this.note = "",
   });
+
+  Expense.fromJson(this.key, Map data) {
+    title = data['title'];
+    category = data['category'];
+    amount = data['amount'].toString();
+    createdAt = data['createdAt'].toString();
+    note = data['note'];
+  }
 }

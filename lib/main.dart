@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:google_sign_in/google_sign_in.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:scoped_model/scoped_model.dart';
 
 import 'package:money_monitor/scoped_models/main.dart';
 import 'package:money_monitor/pages/login.dart';
+import 'package:money_monitor/pages/home.dart';
 
 final FirebaseAuth _auth = FirebaseAuth.instance;
-final GoogleSignIn _googleSignIn = GoogleSignIn();
 
 void main() {
   runApp(MyApp());
@@ -27,6 +27,8 @@ class MyApp extends StatelessWidget {
         ),
         theme: ThemeData(
           brightness: Brightness.light,
+          primaryColorLight: Colors.white,
+          bottomAppBarColor: Colors.red,
           accentColor: Colors.blueAccent,
         ),
       ),
@@ -42,8 +44,11 @@ Widget _authenticateUser(Function loginUser) {
         return _buildSplashScreen();
       } else {
         if (snapshot.hasData) {
+          dynamic user = snapshot.data;
+
           //Fetch User Data
-          return _buildMainScreen(user: snapshot.data, loginUser: loginUser);
+          loginUser(user.displayName, user.uid, user.email, user.photoUrl);
+          return HomePage();
         }
         return LoginScreen();
       }
@@ -55,34 +60,6 @@ Widget _buildSplashScreen() {
   return Scaffold(
     body: Center(
       child: Text("Loading..."),
-    ),
-  );
-}
-
-Widget _buildMainScreen({user, loginUser}) {
-  loginUser(user.displayName, user.uid, user.email, user.photoUrl);
-  return Scaffold(
-    appBar: AppBar(
-      title: Text("Money Monitor"),
-    ),
-    body: Column(
-      children: <Widget>[
-        Center(
-          child: Text(user.displayName +
-              " " +
-              user.uid +
-              " " +
-              user.photoUrl +
-              " " +
-              user.email),
-        ),
-        RaisedButton(
-          child: Text("Sign Out"),
-          onPressed: () {
-            _auth.signOut();
-          },
-        ),
-      ],
     ),
   );
 }
