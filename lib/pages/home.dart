@@ -3,9 +3,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'package:money_monitor/scoped_models/main.dart';
 import 'package:money_monitor/models/user.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:money_monitor/models/expense.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:money_monitor/models/category.dart';
+import 'package:money_monitor/widgets/expenses/expense_tile.dart';
 
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 
@@ -35,20 +36,6 @@ class _HomePageState extends State<HomePage> {
     setState(() {
       _selectedIndex = index;
     });
-  }
-
-  _buildLogoutButton() {
-    return ScopedModelDescendant<MainModel>(
-      builder: (BuildContext context, Widget widget, MainModel model) {
-        return RaisedButton(
-          child: Text("Sign Out"),
-          onPressed: () {
-            model.logoutUser();
-            FirebaseAuth.instance.signOut();
-          },
-        );
-      },
-    );
   }
 
   _buildUserInfo() {
@@ -92,6 +79,13 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
+      actions: <Widget>[
+        IconButton(
+          color: Colors.grey,
+          icon: Icon(Icons.search),
+          onPressed: () {},
+        ),
+      ],
     );
   }
 
@@ -106,6 +100,13 @@ class _HomePageState extends State<HomePage> {
           fontSize: 20.0,
         ),
       ),
+      actions: <Widget>[
+        IconButton(
+          color: Colors.grey,
+          icon: Icon(Icons.search),
+          onPressed: () {},
+        ),
+      ],
     );
   }
 
@@ -114,6 +115,10 @@ class _HomePageState extends State<HomePage> {
     return DefaultTabController(
       length: 2,
       child: Scaffold(
+        floatingActionButton: FloatingActionButton(
+          child: Icon(Icons.add),
+          onPressed: () {},
+        ),
         appBar: _selectedIndex == 1 ? _buildAppBar() : _buildAppBar2(),
         body: Center(
           child: _widgetOptions.elementAt(_selectedIndex),
@@ -170,17 +175,49 @@ class ExpensesList extends StatelessWidget {
         return FutureBuilder(
           future: FirebaseDatabase.instance
               .reference()
-              .child('users/${model.authenticatedUser.uid}/expenses')
+              .child('users/${model.authenticatedUser.uid}')
               .once(),
           builder: (BuildContext context, AsyncSnapshot snapshot) {
             if (!snapshot.hasData) {
               return new CircularProgressIndicator();
             }
             List<Expense> expenses = [];
+            List<Category> categories = [];
+            String theme;
+            String currency;
+
+            Map<dynamic, dynamic> categoryMap;
             Map<dynamic, dynamic> expenseMap = snapshot.data.value;
             expenseMap.forEach((key, value) {
-              expenses.add(Expense.fromJson(key, value));
+              if (key == "expenses") {
+                Map<dynamic, dynamic> expenseT = value;
+                expenseT.forEach((key, value) {
+                  expenses.add(Expense.fromJson(key, value));
+                });
+              }
+              if (key == "preferences") {
+                Map<dynamic, dynamic> pref = value;
+                pref.forEach((key, value) {
+                  if (key == "theme") {
+                    theme = value;
+                  }
+
+                  if (key == "currency") {
+                    currency = value;
+                  }
+
+                  if (key == "userCategories") {
+                    categoryMap = value;
+                  }
+                });
+              }
             });
+
+            categoryMap.forEach((key, value) {
+              categories.add(Category.fromJson(key, value));
+            });
+
+            model.setPreferences(theme, currency, categories);
             model.setExpenses(expenses);
             model.toggleSynced();
             return Expenses();
@@ -197,6 +234,7 @@ class Expenses extends StatelessWidget {
     Duration difference = DateTime.now().difference(lastUpdate);
     if (difference.inMinutes < 10) {
       Scaffold.of(context).showSnackBar(SnackBar(
+        backgroundColor: Colors.blueAccent,
         content: Text(
             "Next update available in ${10 - difference.inMinutes} minutes."),
         action: SnackBarAction(
@@ -204,6 +242,7 @@ class Expenses extends StatelessWidget {
             Scaffold.of(context).hideCurrentSnackBar();
           },
           label: "Dismiss",
+          textColor: Colors.white,
         ),
       ));
     } else {
@@ -226,13 +265,14 @@ class Expenses extends StatelessWidget {
     return ScopedModelDescendant<MainModel>(
       builder: (BuildContext context, Widget widget, MainModel model) {
         List<Expense> expenses = model.allExpenses;
+        print(model.userCurrency);
         return Container(
           child: RefreshIndicator(
             onRefresh: () => _getData(model.authenticatedUser,
                 model.setExpenses, model.lastUpdate, context),
             child: ListView.builder(
               itemBuilder: (BuildContext context, int index) =>
-                  ExpenseCard(expenses[index], index),
+                  ExpenseTile(expenses[index], index, model.expenseCategory, model.userCurrency),
               itemCount: expenses.length,
             ),
           ),
@@ -259,22 +299,4 @@ class ProfilePage extends StatelessWidget {
   }
 }
 
-class ExpenseCard extends StatelessWidget {
-  final Expense expense;
-  final int index;
-  ExpenseCard(this.expense, this.index);
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      leading: Icon(Icons.train),
-      title: Text(expense.title),
-      subtitle: Text("£" + expense.amount),
-      trailing: Text(
-        DateTime.fromMillisecondsSinceEpoch(int.parse(expense.createdAt))
-            .toIso8601String()
-            .substring(0, 10),
-      ),
-      isThreeLine: true,
-    );
-  }
-}
+
