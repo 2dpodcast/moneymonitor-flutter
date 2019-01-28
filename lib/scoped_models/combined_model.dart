@@ -19,11 +19,11 @@ mixin CombinedModel on Model {
   User _authUser;
   List<Expense> _expenses = [];
   Preferences _userPreferences;
-  bool synced = false;
+  bool _synced = false;
   DateTime _lastUpdated;
 
   bool get syncStatus {
-    return synced;
+    return _synced;
   }
 
   DateTime get lastUpdate {
@@ -46,9 +46,12 @@ mixin CombinedModel on Model {
   }
 
   void toggleSynced() {
-    synced = !synced;
+    _synced = !_synced;
   }
 
+  void gotNoData() {
+    _expenses = [];
+  }
   void setPreferences(
       String theme, String currency, List<Category> categories) {
     String actualCurrency = "";
@@ -99,6 +102,9 @@ mixin UserModel on CombinedModel {
   void logoutUser() {
     _authUser = null;
     _lastUpdated = null;
+    _expenses = [];
+    _userPreferences = null;
     toggleSynced();
+    notifyListeners();
   }
 }

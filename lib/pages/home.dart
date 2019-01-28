@@ -6,6 +6,7 @@ import 'package:money_monitor/models/user.dart';
 import 'package:money_monitor/models/expense.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:money_monitor/models/category.dart';
+import 'package:money_monitor/main.dart';
 import 'package:money_monitor/widgets/expenses/expense_tile.dart';
 
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
@@ -188,38 +189,46 @@ class ExpensesList extends StatelessWidget {
 
             Map<dynamic, dynamic> categoryMap;
             Map<dynamic, dynamic> expenseMap = snapshot.data.value;
-            expenseMap.forEach((key, value) {
-              if (key == "expenses") {
-                Map<dynamic, dynamic> expenseT = value;
-                expenseT.forEach((key, value) {
-                  expenses.add(Expense.fromJson(key, value));
+            if (expenseMap != null) {
+              expenseMap.forEach((key, value) {
+                if (key == "expenses") {
+                  Map<dynamic, dynamic> expenseT = value;
+                  expenseT.forEach((key, value) {
+                    expenses.add(Expense.fromJson(key, value));
+                  });
+                }
+                if (key == "preferences") {
+                  Map<dynamic, dynamic> pref = value;
+                  pref.forEach((key, value) {
+                    if (key == "theme") {
+                      theme = value;
+                    }
+
+                    if (key == "currency") {
+                      currency = value;
+                    }
+
+                    if (key == "userCategories") {
+                      categoryMap = value;
+                    }
+                  });
+                }
+              });
+
+              if (categoryMap != null) {
+                categoryMap.forEach((key, value) {
+                  categories.add(Category.fromJson(key, value));
                 });
               }
-              if (key == "preferences") {
-                Map<dynamic, dynamic> pref = value;
-                pref.forEach((key, value) {
-                  if (key == "theme") {
-                    theme = value;
-                  }
 
-                  if (key == "currency") {
-                    currency = value;
-                  }
-
-                  if (key == "userCategories") {
-                    categoryMap = value;
-                  }
-                });
+              model.setPreferences(theme, currency, categories);
+              if (expenses.length > 0) {
+                model.setExpenses(expenses);
               }
-            });
-
-            categoryMap.forEach((key, value) {
-              categories.add(Category.fromJson(key, value));
-            });
-
-            model.setPreferences(theme, currency, categories);
-            model.setExpenses(expenses);
-            model.toggleSynced();
+              model.toggleSynced();
+            } else {
+              model.gotNoData();
+            }
             return Expenses();
           },
         );
@@ -230,7 +239,24 @@ class ExpensesList extends StatelessWidget {
 
 class Expenses extends StatelessWidget {
   Future<void> _getData(User user, Function setExpenses, DateTime lastUpdate,
-      BuildContext context) async {
+      BuildContext context, Function gotNoData) async {
+    if (lastUpdate == null) {
+      DataSnapshot snapshot = await FirebaseDatabase.instance
+          .reference()
+          .child('users/${user.uid}/expenses')
+          .once();
+
+      List<Expense> expenses = [];
+      Map<dynamic, dynamic> expenseMap = snapshot.value;
+      if (expenseMap == null) {
+        return gotNoData();
+      }
+      expenseMap.forEach((key, value) {
+        expenses.add(Expense.fromJson(key, value));
+      });
+      setExpenses(expenses);
+      return ('');
+    }
     Duration difference = DateTime.now().difference(lastUpdate);
     if (difference.inMinutes < 10) {
       Scaffold.of(context).showSnackBar(SnackBar(
@@ -253,6 +279,9 @@ class Expenses extends StatelessWidget {
 
       List<Expense> expenses = [];
       Map<dynamic, dynamic> expenseMap = snapshot.value;
+      if (expenseMap == null) {
+        return gotNoData();
+      }
       expenseMap.forEach((key, value) {
         expenses.add(Expense.fromJson(key, value));
       });
@@ -265,16 +294,35 @@ class Expenses extends StatelessWidget {
     return ScopedModelDescendant<MainModel>(
       builder: (BuildContext context, Widget widget, MainModel model) {
         List<Expense> expenses = model.allExpenses;
-        print(model.userCurrency);
+
         return Container(
           child: RefreshIndicator(
             onRefresh: () => _getData(model.authenticatedUser,
-                model.setExpenses, model.lastUpdate, context),
-            child: ListView.builder(
-              itemBuilder: (BuildContext context, int index) =>
-                  ExpenseTile(expenses[index], index, model.expenseCategory, model.userCurrency),
-              itemCount: expenses.length,
-            ),
+                model.setExpenses, model.lastUpdate, context, model.gotNoData),
+            child: expenses.length == 0
+                ? Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Center(
+                        child: Text("No Expenses"),
+                      ),
+                      RaisedButton(
+                        child: Text("Refresh"),
+                        onPressed: () => _getData(
+                            model.authenticatedUser,
+                            model.setExpenses,
+                            model.lastUpdate,
+                            context,
+                            model.gotNoData),
+                      ),
+                    ],
+                  )
+                : ListView.builder(
+                    itemBuilder: (BuildContext context, int index) =>
+                        ExpenseTile(expenses[index], index,
+                            model.expenseCategory, model.userCurrency),
+                    itemCount: expenses.length,
+                  ),
           ),
         );
       },
@@ -292,11 +340,10 @@ class ProfilePage extends StatelessWidget {
           onPressed: () {
             model.logoutUser();
             FirebaseAuth.instance.signOut();
+            runApp(MyApp());
           },
         );
       },
     );
   }
 }
-
-
