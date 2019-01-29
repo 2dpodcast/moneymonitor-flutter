@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:scoped_model/scoped_model.dart';
+import 'package:money_monitor/scoped_models/main.dart';
 
 final FirebaseAuth _auth = FirebaseAuth.instance;
 final GoogleSignIn _googleSignIn = GoogleSignIn();
@@ -54,6 +56,7 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       await _auth.createUserWithEmailAndPassword(
           email: email, password: password);
+
       setState(() {
         _showSignUp = false;
       });
@@ -240,132 +243,138 @@ class _LoginScreenState extends State<LoginScreen> {
         ? 500.0
         : MediaQuery.of(context).size.width * 0.9;
 
-    return Scaffold(
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      floatingActionButton: FloatingActionButton.extended(
-        elevation: 4.0,
-        icon: const Icon(MdiIcons.google),
-        label: const Text('Login With Google'),
-        onPressed: _authenticateWithGoogle,
-      ),
-      bottomNavigationBar: BottomAppBar(
-        color: Colors.white,
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: <Widget>[
-            Column(
+    return ScopedModelDescendant<MainModel>(
+      builder: (BuildContext context, Widget widget, MainModel model) {
+        return Scaffold(
+          floatingActionButtonLocation:
+              FloatingActionButtonLocation.centerDocked,
+          floatingActionButton: FloatingActionButton.extended(
+            elevation: 4.0,
+            icon: const Icon(MdiIcons.google),
+            label: const Text('Login With Google'),
+            onPressed: _authenticateWithGoogle,
+          ),
+          bottomNavigationBar: BottomAppBar(
+            color: Colors.white,
+            child: Row(
               mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.end,
               children: <Widget>[
-                Padding(
-                  padding: EdgeInsets.only(right: 80.0),
-                ),
-                IconButton(
-                  icon: Icon(_showSignUp ? MdiIcons.login : Icons.person_add),
-                  onPressed: () {
-                    setState(() {
-                      _showSignUp = !_showSignUp;
-                      _formData["email"] = null;
-                      _formData["password"] = null;
-                      _formData["confirmPassword"] = null;
-                      _formKey.currentState.reset();
-                    });
-                  },
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    Padding(
+                      padding: EdgeInsets.only(right: 80.0),
+                    ),
+                    IconButton(
+                      icon:
+                          Icon(_showSignUp ? MdiIcons.login : Icons.person_add),
+                      onPressed: () {
+                        setState(() {
+                          _showSignUp = !_showSignUp;
+                          _formData["email"] = null;
+                          _formData["password"] = null;
+                          _formData["confirmPassword"] = null;
+                          _formKey.currentState.reset();
+                        });
+                      },
+                    ),
+                  ],
                 ),
               ],
             ),
-          ],
-        ),
-      ),
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            stops: [0.1, 0.9],
-            colors: [Colors.white, Colors.blue[200]],
           ),
-        ),
-        child: Center(
-          child: SingleChildScrollView(
-            child: Container(
-              width: targetWidth,
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  children: <Widget>[
-                    _buildHeader(),
-                    SizedBox(
-                      height: 10.0,
-                    ),
-                    _buildEmailField(),
-                    SizedBox(
-                      height: 10,
-                    ),
-                    _buildPasswordField(),
-                    SizedBox(
-                      height: 10,
-                    ),
-                    _showSignUp ? _buildConfirmPassword() : Container(),
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(100),
-                        color: Theme.of(context).accentColor,
-                      ),
-                      child: MaterialButton(
-                        onPressed: () {
-                          if (!_formKey.currentState.validate()) {
-                            return "";
-                          }
-
-                          _formKey.currentState.save();
-
-                          if (_showSignUp) {
-                            if (_formData['password'] !=
-                                _formData['confirmPassword']) {
-                              return _buildSignInErrorDialog(
-                                  "Please enter matching passwords");
-                            }
-                            _signUpWithEmailandPassword(
-                                _formData["email"], _formData["password"]);
-                          } else {
-                            _authenticateWithEmailandPassword(
-                                _formData["email"], _formData["password"]);
-                          }
-                        },
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            Icon(
-                              Icons.arrow_forward,
-                              color: Colors.white,
-                              size: 30,
-                            ),
-                            SizedBox(
-                              width: 5.0,
-                            ),
-                            Text(
-                              _showSignUp ? "Sign Up" : "Login",
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w500),
-                            ),
-                            Padding(
-                              padding: EdgeInsets.only(right: 20.0),
-                            )
-                          ],
+          body: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                stops: [0.1, 0.9],
+                colors: [Colors.white, Colors.blue[200]],
+              ),
+            ),
+            child: Center(
+              child: SingleChildScrollView(
+                child: Container(
+                  width: targetWidth,
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      children: <Widget>[
+                        _buildHeader(),
+                        SizedBox(
+                          height: 10.0,
                         ),
-                      ),
+                        _buildEmailField(),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        _buildPasswordField(),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        _showSignUp ? _buildConfirmPassword() : Container(),
+                        Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(100),
+                            color: Theme.of(context).accentColor,
+                          ),
+                          child: MaterialButton(
+                            onPressed: () {
+                              if (!_formKey.currentState.validate()) {
+                                return "";
+                              }
+
+                              _formKey.currentState.save();
+
+                              if (_showSignUp) {
+                                if (_formData['password'] !=
+                                    _formData['confirmPassword']) {
+                                  return _buildSignInErrorDialog(
+                                      "Please enter matching passwords");
+                                }
+                                _signUpWithEmailandPassword(
+                                    _formData["email"], _formData["password"]);
+                              } else {
+                                _authenticateWithEmailandPassword(
+                                    _formData["email"], _formData["password"]);
+                              }
+                            },
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: <Widget>[
+                                Icon(
+                                  Icons.arrow_forward,
+                                  color: Colors.white,
+                                  size: 30,
+                                ),
+                                SizedBox(
+                                  width: 5.0,
+                                ),
+                                Text(
+                                  _showSignUp ? "Sign Up" : "Login",
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w500),
+                                ),
+                                Padding(
+                                  padding: EdgeInsets.only(right: 20.0),
+                                )
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
               ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

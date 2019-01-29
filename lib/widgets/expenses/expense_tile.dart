@@ -103,41 +103,40 @@ class ExpenseTile extends StatelessWidget {
     final category = expenseCategory(expense.category);
     return Column(
       children: <Widget>[
-        InkWell(
-          onTap: () {
-            showModalBottomSheet(
-                context: context,
-                builder: (BuildContext context) {
-                  return _buildModelSheet(context, category);
-                });
-          },
-          splashColor: Colors.blue[100],
-          child: ListTile(
-            leading: Icon(
-              category.icon != null ? category.icon : MdiIcons.cashRegister,
-              color: Colors.blueAccent,
-            ),
-            title: Text(
-              expense.title,
-              style: TextStyle(
-                fontSize: 16.0,
-                fontWeight: FontWeight.w500,
+        Card(
+                  child: InkWell(
+            onTap: () {
+              showModalBottomSheet(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return _buildModelSheet(context, category);
+                  });
+            },
+            splashColor: Colors.blue[100],
+            child: ListTile(
+              leading: Icon(
+                category.icon != null ? category.icon : MdiIcons.cashRegister,
+                color: Colors.blueAccent,
+              ),
+              title: Text(
+                expense.title,
+                style: TextStyle(
+                  fontSize: 16.0,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              subtitle: Padding(
+                padding: const EdgeInsets.only(top: 4.0),
+                child: Text(currency +
+                    (double.parse(expense.amount) / 100).toStringAsFixed(2)),
+              ),
+              trailing: Text(
+                DateTime.fromMillisecondsSinceEpoch(int.parse(expense.createdAt))
+                    .toIso8601String()
+                    .substring(0, 10),
               ),
             ),
-            subtitle: Padding(
-              padding: const EdgeInsets.only(top: 4.0),
-              child: Text(currency +
-                  (double.parse(expense.amount) / 100).toStringAsFixed(2)),
-            ),
-            trailing: Text(
-              DateTime.fromMillisecondsSinceEpoch(int.parse(expense.createdAt))
-                  .toIso8601String()
-                  .substring(0, 10),
-            ),
           ),
-        ),
-        Divider(
-          color: Colors.grey,
         ),
       ],
     );

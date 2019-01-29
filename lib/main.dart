@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_database/firebase_database.dart';
 import 'package:scoped_model/scoped_model.dart';
 
 import 'package:money_monitor/scoped_models/main.dart';
@@ -13,18 +12,22 @@ void main() {
   runApp(MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
+  @override
+  State<StatefulWidget> createState() {
+    return _MyAppState();
+  }
+}
+
+class _MyAppState extends State<MyApp> {
+  MainModel model = MainModel();
   @override
   Widget build(BuildContext context) {
     return ScopedModel<MainModel>(
-      model: MainModel(),
+      model: model,
       child: MaterialApp(
         title: 'Money Monitor',
-        home: ScopedModelDescendant<MainModel>(
-          builder: (BuildContext context, Widget widget, MainModel model) {
-            return _authenticateUser(model.loginUser);
-          },
-        ),
+        home: _authenticateUser(model.loginUser),
         theme: ThemeData(
           brightness: Brightness.light,
           primaryColorLight: Colors.white,
@@ -46,6 +49,7 @@ Widget _authenticateUser(Function loginUser) {
           dynamic user = snapshot.data;
 
           //Fetch User Data
+          print(user.displayName);
           loginUser(user.displayName, user.uid, user.email, user.photoUrl);
           return HomePage();
         }

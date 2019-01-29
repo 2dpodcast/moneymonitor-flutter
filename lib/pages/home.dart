@@ -10,6 +10,9 @@ import 'package:money_monitor/main.dart';
 import 'package:money_monitor/widgets/expenses/expense_tile.dart';
 
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:money_monitor/widgets/navigation/side_drawer.dart';
+
+List<Category> categories;
 
 class HomePage extends StatefulWidget {
   @override
@@ -19,8 +22,10 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  String _formData = "";
   int _selectedIndex = 0;
-
+  bool _showSearch = false;
   final _widgetOptions = [
     ExpensesList(),
     Manage(),
@@ -35,27 +40,9 @@ class _HomePageState extends State<HomePage> {
 
   void _onItemTapped(int index) {
     setState(() {
+      _showSearch = false;
       _selectedIndex = index;
     });
-  }
-
-  _buildUserInfo() {
-    return ScopedModelDescendant<MainModel>(
-      builder: (BuildContext context, Widget widget, MainModel model) {
-        final User user = model.authenticatedUser;
-        return Container(
-          child: Column(
-            children: <Widget>[
-              Text(user.displayName),
-              SizedBox(
-                height: 3.0,
-              ),
-              Text(user.email),
-            ],
-          ),
-        );
-      },
-    );
   }
 
   _buildAppBar() {
@@ -92,7 +79,39 @@ class _HomePageState extends State<HomePage> {
 
   _buildAppBar2() {
     return AppBar(
-      title: Text("Money Monitor"),
+      iconTheme: new IconThemeData(color: Colors.grey),
+      automaticallyImplyLeading: !_showSearch,
+      title: Form(
+        key: _formKey,
+        child: _showSearch
+            ? TextFormField(
+                onSaved: (value) => _formData = value,
+                decoration: InputDecoration(
+                  contentPadding: EdgeInsets.only(top: 16.0, left: 10.0),
+                  hintText: "Search",
+                  suffixIcon: IconButton(
+                    onPressed: () {
+                      _formKey.currentState.save();
+
+                      if (_formData.trim().length > 0) {
+                        _formKey.currentState.reset();
+                      } else {
+                        _formKey.currentState.reset();
+                        // TODO Reset search filter
+                        setState(() {
+                          _showSearch = false;
+                        });
+                      }
+                    },
+                    icon: Icon(
+                      Icons.clear,
+                      size: 20.0,
+                    ),
+                  ),
+                ),
+              )
+            : Text("Money Monitor"),
+      ),
       backgroundColor: Theme.of(context).primaryColorLight,
       textTheme: TextTheme(
         title: TextStyle(
@@ -104,10 +123,28 @@ class _HomePageState extends State<HomePage> {
       actions: <Widget>[
         IconButton(
           color: Colors.grey,
-          icon: Icon(Icons.search),
-          onPressed: () {},
+          icon: Icon(_showSearch ? Icons.arrow_forward : Icons.search),
+          onPressed: () {
+            if (!_showSearch) {
+              setState(() {
+                _showSearch = !_showSearch;
+              });
+            } else {
+              // Search
+            }
+          },
         ),
       ],
+    );
+  }
+
+  _buildDrawer() {
+    return ScopedModelDescendant<MainModel>(
+      builder: (BuildContext context, Widget widget, MainModel model) {
+        categories = model.allCategories;
+        return SideDrawer(model.updateCategoryFilter, model.updateSort,
+            model.sortBy, model.allCategories);
+      },
     );
   }
 
@@ -120,11 +157,13 @@ class _HomePageState extends State<HomePage> {
           child: Icon(Icons.add),
           onPressed: () {},
         ),
+        drawer: _buildDrawer(),
         appBar: _selectedIndex == 1 ? _buildAppBar() : _buildAppBar2(),
         body: Center(
           child: _widgetOptions.elementAt(_selectedIndex),
         ),
         bottomNavigationBar: BottomNavigationBar(
+          type: BottomNavigationBarType.fixed,
           onTap: _onItemTapped,
           currentIndex: _selectedIndex,
           fixedColor: Theme.of(context)
@@ -136,7 +175,7 @@ class _HomePageState extends State<HomePage> {
             ),
             BottomNavigationBarItem(
               icon: new Icon(Icons.edit),
-              title: new Text('Manage Expenses'),
+              title: new Text('Manage'),
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.person),
@@ -293,7 +332,7 @@ class Expenses extends StatelessWidget {
   Widget build(BuildContext context) {
     return ScopedModelDescendant<MainModel>(
       builder: (BuildContext context, Widget widget, MainModel model) {
-        List<Expense> expenses = model.allExpenses;
+        List<Expense> expenses = model.filteredExpenses;
 
         return Container(
           child: RefreshIndicator(
@@ -318,9 +357,10 @@ class Expenses extends StatelessWidget {
                     ],
                   )
                 : ListView.builder(
-                    itemBuilder: (BuildContext context, int index) =>
-                        ExpenseTile(expenses[index], index,
-                            model.expenseCategory, model.userCurrency),
+                    itemBuilder: (BuildContext context, int index) {
+                      return ExpenseTile(expenses[index], index,
+                          model.expenseCategory, model.userCurrency);
+                    },
                     itemCount: expenses.length,
                   ),
           ),

@@ -11,4 +11,8 @@ class Category {
     id = key;
     name = value["name"];
   }
+
+  void updateVisibility(bool value) {
+    show = value;
+  }
 }
