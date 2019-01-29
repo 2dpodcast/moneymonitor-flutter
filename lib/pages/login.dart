@@ -14,10 +14,12 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  bool _showSignUp = false;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final Map<String, String> _formData = {
     "email": null,
     "password": null,
+    "confirmPassword": null
   };
 
   void _authenticateWithGoogle() async {
@@ -32,7 +34,63 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _authenticateWithEmailandPassword(String email, String password) async {
-    await _auth.signInWithEmailAndPassword(email: email, password: password);
+    try {
+      await _auth.signInWithEmailAndPassword(email: email, password: password);
+    } catch (e) {
+      String errorMessage = e.message;
+      print(errorMessage);
+      String invalidPassword =
+          "The password is invalid or the user does not have a password.";
+      String userDoesntExist =
+          "There is no user record corresponding to this identifier. The user may have been deleted.";
+
+      if (errorMessage == invalidPassword) {
+        _buildSignInErrorDialog("Password is invalid", true);
+      }
+    }
+  }
+
+  void _signUpWithEmailandPassword(String email, String password) async {
+    try {
+      await _auth.createUserWithEmailAndPassword(
+          email: email, password: password);
+      setState(() {
+        _showSignUp = false;
+      });
+    } catch (e) {
+      String errorCode = e.code;
+      String errorMessage = e.message;
+      print(errorMessage);
+      if (errorMessage ==
+          "The email address is already in use by another account.") {
+        _buildSignInErrorDialog(
+            "The email address is already in use by another account.");
+      }
+    }
+  }
+
+  _buildSignInErrorDialog(String message, [bool showReset]) {
+    return showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          content: Text(message),
+          title: Text("Account Error"),
+          actions: <Widget>[
+            showReset != null && showReset == true
+                ? MaterialButton(
+                    child: Text("Reset Password"),
+                    onPressed: () {},
+                  )
+                : Container(),
+            MaterialButton(
+              child: Text("Okay"),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Widget _buildHeader() {
@@ -122,6 +180,7 @@ class _LoginScreenState extends State<LoginScreen> {
           borderSide: BorderSide.none,
           borderRadius: BorderRadius.circular(30.0),
         ),
+        helperText: _showSignUp ? "Minimum 8 characters" : "",
         hintText: "Password",
         hintStyle: TextStyle(
           fontWeight: FontWeight.w600,
@@ -134,6 +193,44 @@ class _LoginScreenState extends State<LoginScreen> {
         _formData["password"] = value;
       },
       obscureText: true,
+    );
+  }
+
+  Widget _buildConfirmPassword() {
+    return Column(
+      children: <Widget>[
+        TextFormField(
+          validator: (String value) {
+            if (value.isEmpty || value.length < 8) {
+              return "Please enter a valid password.";
+            }
+          },
+          decoration: InputDecoration(
+            contentPadding: EdgeInsets.symmetric(
+              horizontal: 20.0,
+              vertical: 20.0,
+            ),
+            border: OutlineInputBorder(
+              borderSide: BorderSide.none,
+              borderRadius: BorderRadius.circular(30.0),
+            ),
+            hintText: "Confirm Password",
+            hintStyle: TextStyle(
+              fontWeight: FontWeight.w600,
+            ),
+            hasFloatingPlaceholder: true,
+            filled: true,
+            fillColor: Colors.white,
+          ),
+          onSaved: (String value) {
+            _formData["confirmPassword"] = value;
+          },
+          obscureText: true,
+        ),
+        SizedBox(
+          height: 10,
+        ),
+      ],
     );
   }
 
@@ -164,8 +261,16 @@ class _LoginScreenState extends State<LoginScreen> {
                   padding: EdgeInsets.only(right: 80.0),
                 ),
                 IconButton(
-                  icon: Icon(Icons.person_add),
-                  onPressed: () {},
+                  icon: Icon(_showSignUp ? MdiIcons.login : Icons.person_add),
+                  onPressed: () {
+                    setState(() {
+                      _showSignUp = !_showSignUp;
+                      _formData["email"] = null;
+                      _formData["password"] = null;
+                      _formData["confirmPassword"] = null;
+                      _formKey.currentState.reset();
+                    });
+                  },
                 ),
               ],
             ),
@@ -201,21 +306,57 @@ class _LoginScreenState extends State<LoginScreen> {
                     SizedBox(
                       height: 10,
                     ),
+                    _showSignUp ? _buildConfirmPassword() : Container(),
                     Container(
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(100),
                         color: Theme.of(context).accentColor,
                       ),
-                      child: IconButton(
-                        icon: Icon(Icons.arrow_forward),
-                        color: Colors.white,
+                      child: MaterialButton(
                         onPressed: () {
                           if (!_formKey.currentState.validate()) {
-                            return;
+                            return "";
                           }
+
                           _formKey.currentState.save();
-                          _authenticateWithEmailandPassword(_formData["email"], _formData["password"]);
+
+                          if (_showSignUp) {
+                            if (_formData['password'] !=
+                                _formData['confirmPassword']) {
+                              return _buildSignInErrorDialog(
+                                  "Please enter matching passwords");
+                            }
+                            _signUpWithEmailandPassword(
+                                _formData["email"], _formData["password"]);
+                          } else {
+                            _authenticateWithEmailandPassword(
+                                _formData["email"], _formData["password"]);
+                          }
                         },
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            Icon(
+                              Icons.arrow_forward,
+                              color: Colors.white,
+                              size: 30,
+                            ),
+                            SizedBox(
+                              width: 5.0,
+                            ),
+                            Text(
+                              _showSignUp ? "Sign Up" : "Login",
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w500),
+                            ),
+                            Padding(
+                              padding: EdgeInsets.only(right: 20.0),
+                            )
+                          ],
+                        ),
                       ),
                     ),
                   ],

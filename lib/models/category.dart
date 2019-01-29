@@ -4,6 +4,7 @@ class Category {
   String id;
   String name;
   IconData icon;
+  bool show = true;
   Category(this.id, this.name, [this.icon]);
 
   Category.fromJson(key, value) {
