@@ -4,6 +4,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'package:money_monitor/scoped_models/main.dart';
+import 'package:money_monitor/main.dart';
 
 final FirebaseAuth _auth = FirebaseAuth.instance;
 final GoogleSignIn _googleSignIn = GoogleSignIn();
@@ -48,6 +49,11 @@ class _LoginScreenState extends State<LoginScreen> {
 
       if (errorMessage == invalidPassword) {
         _buildSignInErrorDialog("Password is invalid", true);
+      } else if (errorMessage == userDoesntExist) {
+        _buildSignInErrorDialog("Account does not exist", true);
+      } else {
+        _buildSignInErrorDialog(
+            "Unable to Sign in at this time. Please try again later", true);
       }
     }
   }
@@ -61,13 +67,15 @@ class _LoginScreenState extends State<LoginScreen> {
         _showSignUp = false;
       });
     } catch (e) {
-      String errorCode = e.code;
       String errorMessage = e.message;
       print(errorMessage);
       if (errorMessage ==
           "The email address is already in use by another account.") {
         _buildSignInErrorDialog(
             "The email address is already in use by another account.");
+      } else {
+        _buildSignInErrorDialog(
+            "Unable to Sign up at this time. Please try again later", true);
       }
     }
   }
@@ -108,33 +116,6 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Widget _buildLoginWithGoogle() {
-    return Container(
-      width: 200.0,
-      child: MaterialButton(
-        padding: EdgeInsets.all(10.0),
-        color: Theme.of(context).accentColor,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              "Login With ",
-              style: TextStyle(color: Colors.white),
-            ),
-            SizedBox(
-              width: 3.0,
-            ),
-            Icon(
-              MdiIcons.google,
-              color: Colors.white,
-            ),
-          ],
-        ),
-        onPressed: _authenticateWithGoogle,
-      ),
-    );
-  }
-
   Widget _buildEmailField() {
     return TextFormField(
       validator: (String value) {
@@ -158,7 +139,7 @@ class _LoginScreenState extends State<LoginScreen> {
           fontWeight: FontWeight.w600,
         ),
         filled: true,
-        fillColor: Colors.white,
+        fillColor: deviceTheme == "light" ? Colors.white : Colors.grey[600],
       ),
       onSaved: (String value) {
         _formData["email"] = value;
@@ -190,7 +171,7 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
         hasFloatingPlaceholder: true,
         filled: true,
-        fillColor: Colors.white,
+        fillColor: deviceTheme == "light" ? Colors.white : Colors.grey[600],
       ),
       onSaved: (String value) {
         _formData["password"] = value;
@@ -223,7 +204,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
             hasFloatingPlaceholder: true,
             filled: true,
-            fillColor: Colors.white,
+            fillColor: deviceTheme == "light" ? Colors.white : Colors.grey[600],
           ),
           onSaved: (String value) {
             _formData["confirmPassword"] = value;
@@ -249,13 +230,16 @@ class _LoginScreenState extends State<LoginScreen> {
           floatingActionButtonLocation:
               FloatingActionButtonLocation.centerDocked,
           floatingActionButton: FloatingActionButton.extended(
+            backgroundColor: deviceTheme == "light"
+                ? Theme.of(context).accentColor
+                : Colors.blue[700],
             elevation: 4.0,
             icon: const Icon(MdiIcons.google),
             label: const Text('Login With Google'),
             onPressed: _authenticateWithGoogle,
           ),
           bottomNavigationBar: BottomAppBar(
-            color: Colors.white,
+            color: deviceTheme == "light" ? Colors.white : Colors.grey[750],
             child: Row(
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.end,
@@ -285,14 +269,14 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           ),
           body: Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                stops: [0.1, 0.9],
-                colors: [Colors.white, Colors.blue[200]],
-              ),
-            ),
+            // decoration: BoxDecoration(
+            //   gradient: LinearGradient(
+            //     begin: Alignment.topCenter,
+            //     end: Alignment.bottomCenter,
+            //     stops: [0.1, 0.9],
+            //     colors: [Colors.white, Colors.blue[200]],
+            //   ),
+            // ),
             child: Center(
               child: SingleChildScrollView(
                 child: Container(
@@ -317,7 +301,9 @@ class _LoginScreenState extends State<LoginScreen> {
                         Container(
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(100),
-                            color: Theme.of(context).accentColor,
+                            color: deviceTheme == "light"
+                                ? Theme.of(context).accentColor
+                                : Colors.blue[700],
                           ),
                           child: MaterialButton(
                             onPressed: () {

@@ -14,6 +14,17 @@ final List<Category> defaultCategories = [
   Category("5", "Debt", Icons.monetization_on),
 ];
 
+final ThemeData lightTheme = ThemeData(
+  brightness: Brightness.light,
+  primaryColorLight: Colors.white,
+  accentColor: Colors.blueAccent,
+);
+
+final ThemeData darkTheme = ThemeData(
+  brightness: Brightness.dark,
+  primaryColorLight: Colors.grey,
+);
+
 mixin CombinedModel on Model {
   User _authUser;
   List<Expense> _expenses = [];
@@ -22,6 +33,8 @@ mixin CombinedModel on Model {
   String _newName;
   Preferences _userPreferences;
   String _sortBy = "date";
+  String _searchQuery = "";
+  String _theme = "light";
 
   bool get syncStatus {
     return _synced;
@@ -70,6 +83,11 @@ mixin FilterModel on CombinedModel {
     notifyListeners();
   }
 
+  void updateSearchQuery(String value) {
+    _searchQuery = value.toLowerCase();
+    notifyListeners();
+  }
+
   void updateSort(String value) {
     _sortBy = value;
     notifyListeners();
@@ -85,6 +103,11 @@ mixin FilterModel on CombinedModel {
 
   String get userCurrency {
     return _userPreferences.currency;
+  }
+
+  void updateTheme(String theme) {
+    _userPreferences.theme = theme;
+    notifyListeners();
   }
 
   void setPreferences(
@@ -123,7 +146,12 @@ mixin ExpensesModel on CombinedModel {
       },
     );
 
-    output.sort(
+    List<Expense> finalOutput = output.where((expense) {
+      return expense.title.toLowerCase().contains(_searchQuery) ||
+          expense.note.toLowerCase().contains(_searchQuery);
+    }).toList();
+
+    finalOutput.sort(
       (a, b) {
         if (_sortBy == "date") {
           return b.createdAt.compareTo(a.createdAt);
@@ -135,7 +163,7 @@ mixin ExpensesModel on CombinedModel {
       },
     );
 
-    return output;
+    return finalOutput;
   }
 
   void setExpenses(List<Expense> expenses) {

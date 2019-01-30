@@ -7,6 +7,8 @@ import 'package:money_monitor/main.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:money_monitor/widgets/navigation/side_drawer.dart';
 import 'package:money_monitor/widgets/expenses_builder.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:money_monitor/pages/manage_expenses.dart';
 
 List<Category> categories;
 
@@ -18,13 +20,10 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  String _formData = "";
   int _selectedIndex = 0;
-  bool _showSearch = false;
   final _widgetOptions = [
     ExpensesList(),
-    Manage(),
+    ManageExpenses(),
     ProfilePage(),
   ];
 
@@ -36,102 +35,8 @@ class _HomePageState extends State<HomePage> {
 
   void _onItemTapped(int index) {
     setState(() {
-      _showSearch = false;
       _selectedIndex = index;
     });
-  }
-
-  _buildAppBar() {
-    return AppBar(
-      title: Text("Money Monitor"),
-      backgroundColor: Theme.of(context).primaryColorLight,
-      textTheme: TextTheme(
-        title: TextStyle(
-          color: Colors.black,
-          fontWeight: FontWeight.w700,
-          fontSize: 20.0,
-        ),
-      ),
-      bottom: TabBar(
-        labelColor: Colors.black,
-        tabs: <Widget>[
-          Tab(
-            text: "Create Expense",
-          ),
-          Tab(
-            text: "All Expenses",
-          ),
-        ],
-      ),
-      actions: <Widget>[
-        IconButton(
-          color: Colors.grey,
-          icon: Icon(Icons.search),
-          onPressed: () {},
-        ),
-      ],
-    );
-  }
-
-  _buildAppBar2() {
-    return AppBar(
-      iconTheme: new IconThemeData(color: Colors.grey),
-      automaticallyImplyLeading: !_showSearch,
-      title: Form(
-        key: _formKey,
-        child: _showSearch
-            ? TextFormField(
-                onSaved: (value) => _formData = value,
-                decoration: InputDecoration(
-                  contentPadding: EdgeInsets.only(top: 16.0, left: 10.0),
-                  hintText: "Search",
-                  suffixIcon: IconButton(
-                    onPressed: () {
-                      _formKey.currentState.save();
-
-                      if (_formData.trim().length > 0) {
-                        _formKey.currentState.reset();
-                      } else {
-                        _formKey.currentState.reset();
-                        // TODO Reset search filter
-                        setState(() {
-                          _showSearch = false;
-                        });
-                      }
-                    },
-                    icon: Icon(
-                      Icons.clear,
-                      size: 20.0,
-                    ),
-                  ),
-                ),
-              )
-            : Text("Money Monitor"),
-      ),
-      backgroundColor: Theme.of(context).primaryColorLight,
-      textTheme: TextTheme(
-        title: TextStyle(
-          color: Colors.black,
-          fontWeight: FontWeight.w700,
-          fontSize: 20.0,
-        ),
-      ),
-      actions: <Widget>[
-        IconButton(
-          color: Colors.grey,
-          icon: Icon(_showSearch ? Icons.arrow_forward : Icons.search),
-          onPressed: () {
-            if (!_showSearch) {
-              setState(() {
-                _showSearch = !_showSearch;
-              });
-            } else {
-              // Search
-            }
-          },
-        ),
-      ],
-    );
   }
 
   _buildDrawer() {
@@ -146,57 +51,55 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 2,
-      child: SafeArea(
-              child: Scaffold(
-          floatingActionButton: FloatingActionButton(
-            child: Icon(Icons.add),
-            onPressed: () {},
-          ),
-          drawer: _buildDrawer(),
-          body: Center(
-            child: _widgetOptions.elementAt(_selectedIndex),
-          ),
-          bottomNavigationBar: BottomNavigationBar(
-            type: BottomNavigationBarType.fixed,
-            onTap: _onItemTapped,
-            currentIndex: _selectedIndex,
-            fixedColor: Theme.of(context)
-                .accentColor, // this will be set when a new tab is tapped
-            items: [
-              BottomNavigationBarItem(
-                icon: new Icon(MdiIcons.cashRegister),
-                title: new Text('Expenses'),
+    return Scaffold(
+      backgroundColor:
+          deviceTheme == "light" ? Colors.grey[100] : Colors.grey[700],
+      floatingActionButton: _selectedIndex == 0
+          ? FloatingActionButton(
+              elevation: 5.0,
+              backgroundColor: deviceTheme == "light"
+                  ? Colors.white
+                  : Theme.of(context).primaryColorLight,
+              child: Icon(
+                Icons.add,
+                color: Theme.of(context).accentColor,
+                size: 40,
               ),
-              BottomNavigationBarItem(
-                icon: new Icon(Icons.edit),
-                title: new Text('Manage'),
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.person),
-                title: Text('Profile'),
-              ),
-            ],
-          ),
-        ),
+              onPressed: () {
+                setState(() {
+                  _selectedIndex = 1;
+                });
+              },
+            )
+          : Container(
+              width: 0,
+              height: 0,
+            ),
+      drawer: _buildDrawer(),
+      body: Center(
+        child: _widgetOptions.elementAt(_selectedIndex),
       ),
-    );
-  }
-}
-
-class Manage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return TabBarView(
-      children: <Widget>[
-        Center(
-          child: Text("Expense Form"),
-        ),
-        Center(
-          child: Text("List of Expenses"),
-        ),
-      ],
+      bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
+        onTap: _onItemTapped,
+        currentIndex: _selectedIndex,
+        fixedColor: Theme.of(context)
+            .accentColor, // this will be set when a new tab is tapped
+        items: [
+          BottomNavigationBarItem(
+            icon: new Icon(MdiIcons.cashRegister),
+            title: new Text('Expenses'),
+          ),
+          BottomNavigationBarItem(
+            icon: new Icon(Icons.edit),
+            title: new Text('Manage'),
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            title: Text('Profile'),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -206,13 +109,35 @@ class ProfilePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return ScopedModelDescendant<MainModel>(
       builder: (BuildContext context, Widget widget, MainModel model) {
-        return RaisedButton(
-          child: Text("Sign Out"),
-          onPressed: () {
-            model.logoutUser();
-            FirebaseAuth.instance.signOut();
-            runApp(MyApp());
-          },
+        return Column(
+          children: <Widget>[
+            RaisedButton(
+              child: Text("Sign Out"),
+              onPressed: () {
+                model.logoutUser();
+                FirebaseAuth.instance.signOut();
+                restartApp();
+              },
+            ),
+            RaisedButton(
+              child: Text("Light Theme"),
+              onPressed: () async {
+                model.updateTheme("light");
+                SharedPreferences pref = await SharedPreferences.getInstance();
+                await pref.setString("theme", "light");
+                restartApp();
+              },
+            ),
+            RaisedButton(
+              child: Text("Dark Theme"),
+              onPressed: () async {
+                model.updateTheme("dark");
+                SharedPreferences pref = await SharedPreferences.getInstance();
+                await pref.setString("theme", "dark");
+                restartApp();
+              },
+            ),
+          ],
         );
       },
     );

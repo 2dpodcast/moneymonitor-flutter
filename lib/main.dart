@@ -5,22 +5,55 @@ import 'package:scoped_model/scoped_model.dart';
 import 'package:money_monitor/scoped_models/main.dart';
 import 'package:money_monitor/pages/login.dart';
 import 'package:money_monitor/pages/home.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 final FirebaseAuth _auth = FirebaseAuth.instance;
+String deviceTheme = "light";
 
-void main() {
-  runApp(MyApp());
+final ThemeData lightTheme = ThemeData(
+  brightness: Brightness.light,
+  primaryColor: Colors.blue[700],
+  primaryColorLight: Colors.blueAccent,
+  accentColor: Colors.blueAccent,
+);
+
+final ThemeData darkTheme = ThemeData(
+  brightness: Brightness.dark,
+  primaryColor: Colors.grey[700],
+  primaryColorLight: Colors.grey[850],
+  accentColor: Colors.blue,
+  textSelectionHandleColor: Colors.blue
+);
+
+ restartApp() {
+  main();
+}
+
+void main() async {
+  SharedPreferences pref = await SharedPreferences.getInstance();
+  String theme = (pref.getString("theme") ?? "light");
+  print(theme);
+  deviceTheme = theme;
+  if(theme == "dark") {
+      runApp(MyApp(darkTheme));
+  } else {
+      runApp(MyApp(lightTheme));
+  }
 }
 
 class MyApp extends StatefulWidget {
+  final ThemeData theme;
+  MyApp(this.theme);
   @override
   State<StatefulWidget> createState() {
     return _MyAppState();
   }
 }
 
+
 class _MyAppState extends State<MyApp> {
   MainModel model = MainModel();
+
   @override
   Widget build(BuildContext context) {
     return ScopedModel<MainModel>(
@@ -28,11 +61,7 @@ class _MyAppState extends State<MyApp> {
       child: MaterialApp(
         title: 'Money Monitor',
         home: _authenticateUser(model.loginUser),
-        theme: ThemeData(
-          brightness: Brightness.light,
-          primaryColorLight: Colors.white,
-          accentColor: Colors.blueAccent,
-        ),
+        theme: widget.theme,
       ),
     );
   }

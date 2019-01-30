@@ -8,7 +8,8 @@ class SideDrawer extends StatefulWidget {
   final Function updateSort;
   final String sortByVal;
   final List<Category> allCategories;
-  SideDrawer(this.updateCategoryFilter, this.updateSort, this.sortByVal, this.allCategories);
+  SideDrawer(this.updateCategoryFilter, this.updateSort, this.sortByVal,
+      this.allCategories);
   @override
   State<StatefulWidget> createState() {
     return _SideDrawerState();
@@ -44,7 +45,6 @@ class _SideDrawerState extends State<SideDrawer> {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
     return ScopedModelDescendant<MainModel>(
       builder: (BuildContext context, Widget widget, MainModel model) {
         return Drawer(
@@ -70,7 +70,7 @@ class _SideDrawerState extends State<SideDrawer> {
                     ],
                   ),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).accentColor,
+                    color: Theme.of(context).primaryColorLight,
                   ),
                 ),
               ),
@@ -82,18 +82,21 @@ class _SideDrawerState extends State<SideDrawer> {
                 ),
                 children: <Widget>[
                   RadioListTile(
+                    activeColor: Theme.of(context).accentColor,
                     onChanged: _changeSortValue,
                     groupValue: _sortByValue,
                     value: "date",
                     title: Text("Date"),
                   ),
                   RadioListTile(
+                    activeColor: Theme.of(context).accentColor,
                     onChanged: _changeSortValue,
                     groupValue: _sortByValue,
                     value: "amount",
                     title: Text("Amount"),
                   ),
                   RadioListTile(
+                    activeColor: Theme.of(context).accentColor,
                     onChanged: _changeSortValue,
                     groupValue: _sortByValue,
                     value: "category",
@@ -142,10 +145,13 @@ class _SideDrawerState extends State<SideDrawer> {
                     itemCount: categories.length,
                     itemBuilder: (BuildContext context, int index) {
                       return CheckboxListTile(
+                        activeColor: Theme.of(context).accentColor,
                         onChanged: (value) {
-                          setState(() {
-                            categories[index].updateVisibility(value);
-                          });
+                          setState(
+                            () {
+                              categories[index].updateVisibility(value);
+                            },
+                          );
                         },
                         value: categories[index].show,
                         title: Text(categories[index].name),

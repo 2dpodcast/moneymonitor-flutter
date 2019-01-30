@@ -101,44 +101,53 @@ class ExpenseTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final category = expenseCategory(expense.category);
-    return Column(
-      children: <Widget>[
-        Card(
-                  child: InkWell(
-            onTap: () {
-              showModalBottomSheet(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return _buildModelSheet(context, category);
-                  });
-            },
-            splashColor: Colors.blue[100],
-            child: ListTile(
-              leading: Icon(
-                category.icon != null ? category.icon : MdiIcons.cashRegister,
-                color: Colors.blueAccent,
-              ),
-              title: Text(
-                expense.title,
-                style: TextStyle(
-                  fontSize: 16.0,
-                  fontWeight: FontWeight.w500,
+    List<String> date =
+        DateTime.fromMillisecondsSinceEpoch(int.parse(expense.createdAt))
+            .toIso8601String()
+            .substring(0, 10)
+            .split("-");
+
+    return AnimatedContainer(
+      duration: Duration(milliseconds: 500),
+      child: Column(
+        children: <Widget>[
+          Card(
+            margin: EdgeInsets.only(bottom: 2.0),
+            elevation: 0.0,
+            child: InkWell(
+              onTap: () {
+                showModalBottomSheet(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return _buildModelSheet(context, category);
+                    });
+              },
+              splashColor: Colors.blue[100],
+              child: ListTile(
+                leading: Icon(
+                  category.icon != null ? category.icon : MdiIcons.cashRegister,
+                  color: Colors.blueAccent,
                 ),
-              ),
-              subtitle: Padding(
-                padding: const EdgeInsets.only(top: 4.0),
-                child: Text(currency +
-                    (double.parse(expense.amount) / 100).toStringAsFixed(2)),
-              ),
-              trailing: Text(
-                DateTime.fromMillisecondsSinceEpoch(int.parse(expense.createdAt))
-                    .toIso8601String()
-                    .substring(0, 10),
+                title: Text(
+                  expense.title,
+                  style: TextStyle(
+                    fontSize: 16.0,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                subtitle: Padding(
+                  padding: const EdgeInsets.only(top: 4.0),
+                  child: Text(currency + (currency == "€" ? (double.parse(expense.amount) / 100).toStringAsFixed(2).replaceAll(".", ",") :
+                      (double.parse(expense.amount) / 100).toStringAsFixed(2))),
+                ),
+                trailing: Text(currency == "\$"
+                    ? "${date[1]}-${date[2]}-${date[0]}"
+                    : "${date[2]}-${date[1]}-${date[0]}"),
               ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
