@@ -38,8 +38,6 @@ class _ManageExpensesState extends State<ManageExpenses>
             backgroundColor: deviceTheme == "light"
                 ? Theme.of(context).accentColor
                 : Theme.of(context).primaryColorLight,
-            floating: true,
-            pinned: true,
             expandedHeight: 120,
             flexibleSpace: FlexibleSpaceBar(
               background: Container(

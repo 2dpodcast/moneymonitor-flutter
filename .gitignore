@@ -9,6 +9,7 @@
 .buildlog/
 .history
 .svn/
+*.png
 
 # API Keys
 android/app/google-services.json
