@@ -3,6 +3,7 @@ import 'package:material_design_icons_flutter/material_design_icons_flutter.dart
 import 'package:money_monitor/models/category.dart';
 
 import 'package:money_monitor/models/expense.dart';
+import 'package:money_monitor/main.dart';
 import 'package:money_monitor/pages/edit_expense.dart';
 
 class ExpenseTile extends StatelessWidget {
@@ -114,8 +115,69 @@ class ExpenseTile extends StatelessWidget {
             .substring(0, 10)
             .split("-");
 
-    return AnimatedContainer(
-      duration: Duration(milliseconds: 500),
+    return Dismissible(
+      onDismissed: (direction) {
+        print("DISMISSED");
+      },
+      dismissThresholds: {DismissDirection.endToStart: 0.6},
+      background: Container(
+        color: deviceTheme == "light" ? Colors.red : Colors.red[700],
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: <Widget>[
+                Text(
+                  "Delete",
+                  style: TextStyle(
+                    fontSize: 17,
+                    color: Colors.white,
+                  ),
+                ),
+                SizedBox(
+                  width: 20,
+                ),
+              ],
+            )
+          ],
+        ),
+      ),
+      confirmDismiss: (DismissDirection direction) async {
+        bool shouldDelete = false;
+        await showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              content: Text("Are you sure you want to delete this expense?"),
+              title: Text("Delete"),
+              actions: <Widget>[
+                MaterialButton(
+                  child: Text("Delete"),
+                  onPressed: () {
+                    shouldDelete = true;
+                    Navigator.of(context).pop();
+                  },
+                ),
+                MaterialButton(
+                  child: Text("Cancel"),
+                  onPressed: () {
+                    shouldDelete = false;
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            );
+          },
+        );
+
+        if (shouldDelete) {
+          return true;
+        } else {
+          return false;
+        }
+      },
+      key: Key(expense.key),
       child: Column(
         children: <Widget>[
           Card(

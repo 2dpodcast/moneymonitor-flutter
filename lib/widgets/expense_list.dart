@@ -40,7 +40,7 @@ class _ExpenseListState extends State<ExpenseList> {
     Duration difference = DateTime.now().difference(lastUpdate);
     if (difference.inMinutes < 10) {
       Scaffold.of(context).showSnackBar(SnackBar(
-        backgroundColor: Colors.blueAccent,
+        backgroundColor: deviceTheme == "light" ? Colors.blueAccent : Colors.blue[800],
         content: Text(
             "Next update available in ${10 - difference.inMinutes} minutes."),
         action: SnackBarAction(
