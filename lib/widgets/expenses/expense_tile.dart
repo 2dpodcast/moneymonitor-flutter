@@ -3,6 +3,7 @@ import 'package:material_design_icons_flutter/material_design_icons_flutter.dart
 import 'package:money_monitor/models/category.dart';
 
 import 'package:money_monitor/models/expense.dart';
+import 'package:money_monitor/pages/edit_expense.dart';
 
 class ExpenseTile extends StatelessWidget {
   final Expense expense;
@@ -87,7 +88,13 @@ class ExpenseTile extends StatelessWidget {
                 children: <Widget>[
                   IconButton(
                     icon: Icon(Icons.edit),
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => EditExpense(expense),
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),
@@ -137,8 +144,13 @@ class ExpenseTile extends StatelessWidget {
                 ),
                 subtitle: Padding(
                   padding: const EdgeInsets.only(top: 4.0),
-                  child: Text(currency + (currency == "€" ? (double.parse(expense.amount) / 100).toStringAsFixed(2).replaceAll(".", ",") :
-                      (double.parse(expense.amount) / 100).toStringAsFixed(2))),
+                  child: Text(currency +
+                      (currency == "€"
+                          ? (double.parse(expense.amount) / 100)
+                              .toStringAsFixed(2)
+                              .replaceAll(".", ",")
+                          : (double.parse(expense.amount) / 100)
+                              .toStringAsFixed(2))),
                 ),
                 trailing: Text(currency == "\$"
                     ? "${date[1]}-${date[2]}-${date[0]}"

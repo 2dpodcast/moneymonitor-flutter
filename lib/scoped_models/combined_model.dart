@@ -5,6 +5,8 @@ import 'package:money_monitor/models/preference.dart';
 import 'package:money_monitor/models/category.dart';
 import 'package:flutter/material.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:firebase_database/firebase_database.dart';
+import 'package:money_monitor/pages/home.dart';
 
 final List<Category> defaultCategories = [
   Category("1", "Bills", MdiIcons.fileDocument),
@@ -170,6 +172,83 @@ mixin ExpensesModel on CombinedModel {
     _expenses = expenses;
     _lastUpdated = DateTime.now();
     notifyListeners();
+  }
+
+  void addExpense({
+    String title,
+    String amount,
+    int createdAt,
+    String note,
+    String category,
+    BuildContext context,
+  }) async {
+    print("$title | $amount | $createdAt | $note | $category");
+
+    Map<String, dynamic> newExpense = {
+      "title": title,
+      "amount": double.parse(amount) * 100,
+      "createdAt": createdAt,
+      "note": note,
+      "category": category
+    };
+
+    DatabaseReference ref = FirebaseDatabase.instance
+        .reference()
+        .child('users/${_authUser.uid}/expenses')
+        .push();
+    await ref.set(newExpense);
+
+    _expenses.add(Expense(
+        title: title,
+        amount: (double.parse(amount) * 100).toString(),
+        createdAt: createdAt.toString(),
+        note: note,
+        category: category,
+        key: ref.key));
+
+    Navigator.of(context)
+        .pushReplacement(MaterialPageRoute(builder: (context) => HomePage()));
+  }
+
+  void editExpense({
+    String title,
+    String amount,
+    int createdAt,
+    String note,
+    String category,
+    BuildContext context,
+    String key,
+  }) async {
+    print(key);
+    Map<String, dynamic> newExpense = {
+      "title": title,
+      "amount": double.parse(amount) * 100,
+      "createdAt": createdAt,
+      "note": note,
+      "category": category
+    };
+
+    DatabaseReference ref = FirebaseDatabase.instance
+        .reference()
+        .child('users/${_authUser.uid}/expenses/$key');
+    await ref.set(newExpense);
+    print(ref.key);
+
+    _expenses = _expenses.map((expense) {
+      if (expense.key == key) {
+        expense.amount = (double.parse(amount) * 100).toString();
+        expense.title = title;
+        expense.createdAt = createdAt.toString();
+        expense.note = note;
+        expense.category = category;
+        return expense;
+      } else {
+        return expense;
+      }
+    }).toList();
+    
+    Navigator.of(context)
+        .pushReplacement(MaterialPageRoute(builder: (context) => HomePage()));
   }
 }
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:money_monitor/main.dart';
 import 'package:money_monitor/widgets/expenses/create_expense.dart';
+import 'package:money_monitor/widgets/expense_list.dart';
 
 class ManageExpenses extends StatefulWidget {
   @override
@@ -29,16 +30,18 @@ class _ManageExpensesState extends State<ManageExpenses>
 
   @override
   Widget build(BuildContext context) {
-    return NestedScrollView(
-      controller: _scrollController,
-      headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-        return <Widget>[
+    return GestureDetector(
+      onTap: () {
+        FocusScope.of(context).requestFocus(new FocusNode());
+      },
+      child: CustomScrollView(
+        slivers: <Widget>[
           SliverAppBar(
             automaticallyImplyLeading: false,
             backgroundColor: deviceTheme == "light"
                 ? Theme.of(context).accentColor
                 : Theme.of(context).primaryColorLight,
-            expandedHeight: 120,
+            expandedHeight: 80,
             flexibleSpace: FlexibleSpaceBar(
               background: Container(
                 color: Theme.of(context).primaryColorLight,
@@ -52,16 +55,18 @@ class _ManageExpensesState extends State<ManageExpenses>
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: <Widget>[
                           Text(
-                            "Manage",
+                            "Add",
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 30.0,
                               fontWeight: FontWeight.w700,
                             ),
                           ),
-                          SizedBox(width: 5.0,),
+                          SizedBox(
+                            width: 5.0,
+                          ),
                           Text(
-                            "expenses",
+                            "expense",
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 30.0,
@@ -69,29 +74,19 @@ class _ManageExpensesState extends State<ManageExpenses>
                             ),
                           ),
                         ],
-                      )
+                      ),
                     ],
                   ),
                 ),
               ),
             ),
-            forceElevated: innerBoxIsScrolled,
-            bottom: new TabBar(
-              tabs: <Tab>[
-                new Tab(text: "Create"),
-                new Tab(text: "All Expenses"),
-              ],
-              controller: _tabController,
-            ),
           ),
-        ];
-      },
-      body: TabBarView(
-        controller: _tabController,
-        children: <Widget>[
-          ExpenseForm(),
-          Center(
-            child: Text("List of Expenses"),
+          SliverList(
+            delegate: SliverChildListDelegate(
+              <Widget>[
+                ExpenseForm(),
+              ],
+            ),
           ),
         ],
       ),

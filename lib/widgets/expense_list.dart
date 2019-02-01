@@ -5,7 +5,6 @@ import 'package:money_monitor/models/user.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'package:money_monitor/scoped_models/main.dart';
 import 'package:money_monitor/widgets/expenses/expense_tile.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:money_monitor/main.dart';
 
 

@@ -53,7 +53,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor:
-          deviceTheme == "light" ? Colors.grey[100] : Colors.grey[700],
+          deviceTheme == "light" ? Colors.grey[100] : Colors.grey[900],
       floatingActionButton: _selectedIndex == 0
           ? FloatingActionButton(
               elevation: 5.0,
