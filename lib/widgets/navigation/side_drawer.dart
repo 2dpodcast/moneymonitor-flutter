@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:money_monitor/scoped_models/main.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'package:money_monitor/models/category.dart';
+import 'package:money_monitor/main.dart';
 
 class SideDrawer extends StatefulWidget {
   final Function updateCategoryFilter;
@@ -70,7 +71,7 @@ class _SideDrawerState extends State<SideDrawer> {
                     ],
                   ),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).primaryColorLight,
+                    color: deviceTheme == "light" ? Theme.of(context).primaryColorLight : Colors.grey[900],
                   ),
                 ),
               ),

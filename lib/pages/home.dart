@@ -21,6 +21,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
+
   final _widgetOptions = [
     ExpensesList(),
     ManageExpenses(),
@@ -52,24 +53,21 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor:
-          deviceTheme == "light" ? Colors.grey[100] : Colors.grey[900],
+      backgroundColor: deviceTheme == "light"
+          ? Colors.grey[100]
+          : Theme.of(context).primaryColorLight,
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: _selectedIndex == 0
-          ? FloatingActionButton(
-              elevation: 5.0,
-              backgroundColor: deviceTheme == "light"
-                  ? Colors.white
-                  : Theme.of(context).primaryColorLight,
-              child: Icon(
-                Icons.add,
-                color: Theme.of(context).accentColor,
-                size: 40,
-              ),
+          ? FloatingActionButton.extended(
               onPressed: () {
                 setState(() {
                   _selectedIndex = 1;
                 });
               },
+              backgroundColor: Theme.of(context).primaryColorLight,
+              elevation: 5.0,
+              icon: const Icon(Icons.add),
+              label: const Text('Add Expense'),
             )
           : Container(
               width: 0,
@@ -79,7 +77,53 @@ class _HomePageState extends State<HomePage> {
       body: Center(
         child: _widgetOptions.elementAt(_selectedIndex),
       ),
-      bottomNavigationBar: BottomNavigationBar(
+      bottomNavigationBar: BottomAppBar(
+        color: deviceTheme == "light" ? Colors.white : Colors.grey[900],
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 2.0),
+          child: Row(
+            mainAxisSize: MainAxisSize.max,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              IconButton(
+                icon: Icon(
+                  MdiIcons.cashRegister,
+                  size: 30,
+                  color: _selectedIndex == 0
+                      ? Theme.of(context).accentColor
+                      : Colors.grey[500],
+                ),
+                onPressed: () {
+                  setState(() {
+                    _selectedIndex = 0;
+                  });
+                },
+              ),
+              IconButton(
+                icon: Icon(
+                  MdiIcons.settings,
+                  size: 30,
+                  color: _selectedIndex == 2
+                      ? Theme.of(context).accentColor
+                      : Colors.grey[500],
+                ),
+                onPressed: () {
+                  setState(() {
+                    _selectedIndex = 2;
+                  });
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/*
+
+BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         onTap: _onItemTapped,
         currentIndex: _selectedIndex,
@@ -100,9 +144,10 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
-    );
-  }
-}
+
+
+
+*/
 
 class ProfilePage extends StatelessWidget {
   @override

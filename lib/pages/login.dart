@@ -38,7 +38,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   void _authenticateWithEmailandPassword(String email, String password) async {
     try {
-      await _auth.signInWithEmailAndPassword(email: email, password: password);
+      await _auth.signInWithEmailAndPassword(email: email.trim(), password: password);
     } catch (e) {
       String errorMessage = e.message;
       print(errorMessage);

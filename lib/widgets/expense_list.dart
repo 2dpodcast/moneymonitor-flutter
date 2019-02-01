@@ -99,14 +99,13 @@ class _ExpenseListState extends State<ExpenseList> {
           child: CustomScrollView(
             slivers: <Widget>[
               SliverAppBar(
-                backgroundColor: deviceTheme == "light" ? Theme.of(context).accentColor : Theme.of(context).primaryColorLight,
+                backgroundColor: deviceTheme == "light" ? Theme.of(context).accentColor :  Colors.grey[900],
                 automaticallyImplyLeading: false,
                 pinned: false,
                 floating: false,
                 expandedHeight: 260.0,
                 flexibleSpace: FlexibleSpaceBar(
                   background: Container(
-                    color: Theme.of(context).primaryColorLight,
                     padding: EdgeInsets.only(left: 20, right: 20, top: 40),
                     child: SafeArea(
                       bottom: false,
