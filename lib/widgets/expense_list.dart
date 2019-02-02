@@ -252,7 +252,7 @@ class _ExpenseListState extends State<ExpenseList> {
                 delegate: SliverChildBuilderDelegate(
                   (BuildContext context, int index) {
                     return ExpenseTile(expenses[index], index,
-                        model.expenseCategory, model.userCurrency);
+                        model.expenseCategory, model.userCurrency, model.deleteExpense);
                   },
                   childCount: expenses.length,
                 ),

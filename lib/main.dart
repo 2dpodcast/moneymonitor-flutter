@@ -29,6 +29,14 @@ final ThemeData darkTheme = ThemeData(
   main();
 }
 
+logout() {
+  if(deviceTheme == "light") {
+    runApp(MyApp(lightTheme));
+  } else {
+    runApp(MyApp(darkTheme));
+  }
+}
+
 void main() async {
   SharedPreferences pref = await SharedPreferences.getInstance();
   String theme = (pref.getString("theme") ?? "light");

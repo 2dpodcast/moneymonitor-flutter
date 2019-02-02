@@ -8,7 +8,8 @@ import 'package:material_design_icons_flutter/material_design_icons_flutter.dart
 import 'package:money_monitor/widgets/navigation/side_drawer.dart';
 import 'package:money_monitor/widgets/expenses_builder.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:money_monitor/pages/manage_expenses.dart';
+import 'package:money_monitor/pages/add_expense.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 List<Category> categories;
 
@@ -24,20 +25,12 @@ class _HomePageState extends State<HomePage> {
 
   final _widgetOptions = [
     ExpensesList(),
-    ManageExpenses(),
     ProfilePage(),
   ];
 
   @override
   void initState() {
     super.initState();
-    print("SSSSSSSSSSSSSSSSS");
-  }
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
   }
 
   _buildDrawer() {
@@ -60,9 +53,11 @@ class _HomePageState extends State<HomePage> {
       floatingActionButton: _selectedIndex == 0
           ? FloatingActionButton.extended(
               onPressed: () {
-                setState(() {
-                  _selectedIndex = 1;
-                });
+                Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => AddExpense(),
+                        ),
+                      );
               },
               backgroundColor: Theme.of(context).primaryColorLight,
               elevation: 5.0,
@@ -103,13 +98,13 @@ class _HomePageState extends State<HomePage> {
                 icon: Icon(
                   MdiIcons.settings,
                   size: 30,
-                  color: _selectedIndex == 2
+                  color: _selectedIndex == 1
                       ? Theme.of(context).accentColor
                       : Colors.grey[500],
                 ),
                 onPressed: () {
                   setState(() {
-                    _selectedIndex = 2;
+                    _selectedIndex = 1;
                   });
                 },
               ),
@@ -121,34 +116,6 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-/*
-
-BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        onTap: _onItemTapped,
-        currentIndex: _selectedIndex,
-        fixedColor: Theme.of(context)
-            .accentColor, // this will be set when a new tab is tapped
-        items: [
-          BottomNavigationBarItem(
-            icon: new Icon(MdiIcons.cashRegister),
-            title: new Text('Expenses'),
-          ),
-          BottomNavigationBarItem(
-            icon: new Icon(Icons.edit),
-            title: new Text('Manage'),
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            title: Text('Profile'),
-          ),
-        ],
-      ),
-
-
-
-*/
-
 class ProfilePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -158,9 +125,10 @@ class ProfilePage extends StatelessWidget {
           children: <Widget>[
             RaisedButton(
               child: Text("Sign Out"),
-              onPressed: () {
+              onPressed: ()  async {
+                await FirebaseAuth.instance.signOut();
+                await GoogleSignIn().signOut();
                 model.logoutUser();
-                FirebaseAuth.instance.signOut();
                 restartApp();
               },
             ),

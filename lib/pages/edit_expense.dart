@@ -11,7 +11,6 @@ class EditExpense extends StatefulWidget {
   EditExpense(this.expense);
   @override
   State<StatefulWidget> createState() {
-    // TODO: implement createState
     return _EditExpenseState();
   }
 }
@@ -31,7 +30,8 @@ class _EditExpenseState extends State<EditExpense> {
       "title": widget.expense.title,
       "amount": (double.parse(widget.expense.amount) / 100).toStringAsFixed(2),
       "createdAt": DateTime.fromMillisecondsSinceEpoch(
-          int.parse(widget.expense.createdAt)).millisecondsSinceEpoch,
+              int.parse(widget.expense.createdAt))
+          .millisecondsSinceEpoch,
       "note": widget.expense.note,
     };
   }
@@ -243,7 +243,7 @@ class _EditExpenseState extends State<EditExpense> {
             : Colors.grey[800],
       ),
       child: MaterialButton(
-        onPressed: () {
+        onPressed: () async {
           if (!_formKey.currentState.validate()) {
             return "";
           }
@@ -251,15 +251,16 @@ class _EditExpenseState extends State<EditExpense> {
           _formKey.currentState.save();
 
           String category = _categoryVal == "0" ? "" : _categoryVal;
-          editExpense(
-            title: _formData["title"],
-            amount: _formData['amount'],
-            createdAt: _formData['createdAt'],
-            note: _formData['note'],
-            category: category,
-            context: context,
-            key: widget.expense.key
-          );
+          await editExpense(
+              title: _formData["title"],
+              amount: _formData['amount'],
+              createdAt: _formData['createdAt'],
+              note: _formData['note'],
+              category: category,
+              context: context,
+              key: widget.expense.key);
+
+          Navigator.of(context).pop();
         },
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,

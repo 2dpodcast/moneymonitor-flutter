@@ -4,14 +4,14 @@ import 'package:scoped_model/scoped_model.dart';
 import 'package:money_monitor/scoped_models/main.dart';
 import 'package:money_monitor/models/category.dart';
 
-class ExpenseForm extends StatefulWidget {
+class AddExpense extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {
-    return _ExpenseFormState();
+    return _AddExpenseState();
   }
 }
 
-class _ExpenseFormState extends State<ExpenseForm> {
+class _AddExpenseState extends State<AddExpense> {
   String _categoryVal = '0';
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final Map<String, dynamic> _formData = {
@@ -233,6 +233,7 @@ class _ExpenseFormState extends State<ExpenseForm> {
           _formKey.currentState.save();
 
           String category = _categoryVal == "0" ? "" : _categoryVal;
+          Navigator.of(context).pop();
           addExpense(
             title: _formData["title"],
             amount: _formData['amount'],
@@ -241,7 +242,6 @@ class _ExpenseFormState extends State<ExpenseForm> {
             category: category,
             context: context,
           );
-
           // TODO Save Data to firebase then set locally
         },
         child: Row(
@@ -267,50 +267,157 @@ class _ExpenseFormState extends State<ExpenseForm> {
     );
   }
 
+  _buildCancelButton() {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(100),
+        color: deviceTheme == "light"
+            ? Theme.of(context).accentColor
+            : Colors.grey[800],
+      ),
+      child: MaterialButton(
+        minWidth: 150,
+        onPressed: () => Navigator.of(context).pop(),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Icon(
+              Icons.cancel,
+              color: Colors.white,
+            ),
+            SizedBox(
+              width: 10,
+            ),
+            Text(
+              "Cancel",
+              style: TextStyle(
+                color: Colors.white,
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  _buildForm(model) {
+    return Container(
+      padding: EdgeInsets.all(10),
+      child: SingleChildScrollView(
+        child: Form(
+          key: _formKey,
+          child: Column(
+            children: <Widget>[
+              SizedBox(
+                height: 10,
+              ),
+              _buildTitleField(),
+              SizedBox(
+                height: 10,
+              ),
+              _buildAmountField(model.userCurrency),
+              SizedBox(
+                height: 10,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: <Widget>[
+                  _buildCategorySelector(model.allCategories),
+                  SizedBox(
+                    width: 15.0,
+                  ),
+                  _showDateOption(),
+                ],
+              ),
+              SizedBox(
+                height: 10,
+              ),
+              _buildNoteField(),
+              SizedBox(
+                height: 10,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  _buildSaveButton(model.addExpense),
+                  SizedBox(
+                    width: 10,
+                  ),
+                  _buildCancelButton(),
+                ],
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    // TODO: implement build
     return ScopedModelDescendant<MainModel>(
-      builder: (BuildContext context, Widget widget, MainModel model) {
-        return GestureDetector(
-          child: Container(
-            padding: EdgeInsets.all(10),
-            child: SingleChildScrollView(
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  children: <Widget>[
-                    SizedBox(
-                      height: 10,
-                    ),
-                    _buildTitleField(),
-                    SizedBox(
-                      height: 10,
-                    ),
-                    _buildAmountField(model.userCurrency),
-                    SizedBox(
-                      height: 10,
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: <Widget>[
-                        _buildCategorySelector(model.allCategories),
-                        SizedBox(
-                          width: 15.0,
+      builder: (BuildContext context, _, MainModel model) {
+        return Scaffold(
+          body: GestureDetector(
+            onTap: () {
+              FocusScope.of(context).requestFocus(new FocusNode());
+            },
+            child: CustomScrollView(
+              slivers: <Widget>[
+                SliverAppBar(
+                  automaticallyImplyLeading: false,
+                  backgroundColor: deviceTheme == "light"
+                      ? Theme.of(context).accentColor
+                      : Colors.grey[900],
+                  expandedHeight: 80,
+                  flexibleSpace: FlexibleSpaceBar(
+                    background: Container(
+                      padding: EdgeInsets.only(left: 20, right: 20, top: 30),
+                      child: SafeArea(
+                        bottom: false,
+                        top: true,
+                        child: Column(
+                          children: <Widget>[
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: <Widget>[
+                                Text(
+                                  "Add",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 30.0,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: 5.0,
+                                ),
+                                Text(
+                                  "expense",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 30.0,
+                                    fontWeight: FontWeight.w400,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
-                        _showDateOption(),
-                      ],
+                      ),
                     ),
-                    SizedBox(
-                      height: 10,
-                    ),
-                    _buildNoteField(),
-                    SizedBox(
-                      height: 10,
-                    ),
-                    _buildSaveButton(model.addExpense),
-                  ],
+                  ),
                 ),
-              ),
+                SliverList(
+                  delegate: SliverChildListDelegate(
+                    <Widget>[
+                      _buildForm(model),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
         );

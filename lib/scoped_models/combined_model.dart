@@ -139,11 +139,13 @@ mixin ExpensesModel on CombinedModel {
 
     _expenses.forEach(
       (expense) {
-        Category category = _userPreferences.categories.firstWhere(
-            (category) => category.id == expense.category,
-            orElse: () => Category("0", "empty"));
-        if (category.show || category.name == "empty") {
-          output.add(expense);
+        if (expense != null) {
+          Category category = _userPreferences.categories.firstWhere(
+              (category) => category.id == expense.category,
+              orElse: () => Category("0", "empty"));
+          if (category.show || category.name == "empty") {
+            output.add(expense);
+          }
         }
       },
     );
@@ -206,8 +208,7 @@ mixin ExpensesModel on CombinedModel {
         category: category,
         key: ref.key));
 
-    Navigator.of(context)
-        .pushReplacement(MaterialPageRoute(builder: (context) => HomePage()));
+    notifyListeners();
   }
 
   void editExpense({
@@ -232,7 +233,6 @@ mixin ExpensesModel on CombinedModel {
         .reference()
         .child('users/${_authUser.uid}/expenses/$key');
     await ref.set(newExpense);
-    print(ref.key);
 
     _expenses = _expenses.map((expense) {
       if (expense.key == key) {
@@ -246,9 +246,19 @@ mixin ExpensesModel on CombinedModel {
         return expense;
       }
     }).toList();
-    
-    Navigator.of(context)
-        .pushReplacement(MaterialPageRoute(builder: (context) => HomePage()));
+
+    notifyListeners();
+  }
+
+  void deleteExpense(String key) async {
+    DatabaseReference ref = FirebaseDatabase.instance
+        .reference()
+        .child('users/${_authUser.uid}/expenses/$key');
+    await ref.remove();
+
+    _expenses.removeWhere((expense) => expense.key == key);
+
+    notifyListeners();
   }
 }
 

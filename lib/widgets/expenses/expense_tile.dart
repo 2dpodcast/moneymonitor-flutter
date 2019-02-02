@@ -11,7 +11,8 @@ class ExpenseTile extends StatelessWidget {
   final int index;
   final String currency;
   final Function expenseCategory;
-  ExpenseTile(this.expense, this.index, this.expenseCategory, this.currency);
+  final Function deleteExpense;
+  ExpenseTile(this.expense, this.index, this.expenseCategory, this.currency, this.deleteExpense);
 
   _buildModelSheet(BuildContext context, Category category) {
     return Container(
@@ -117,7 +118,7 @@ class ExpenseTile extends StatelessWidget {
 
     return Dismissible(
       onDismissed: (direction) {
-        print("DISMISSED");
+        deleteExpense(expense.key);
       },
       dismissThresholds: {DismissDirection.endToStart: 0.6},
       background: Container(
