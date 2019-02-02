@@ -15,6 +15,14 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
+  bool darkThemeVal;
+
+  @override
+  void initState() {
+    super.initState();
+    darkThemeVal = deviceTheme == "light" ? false : true;
+  }
+
   @override
   Widget build(BuildContext context) {
     return ScopedModelDescendant<MainModel>(
@@ -144,28 +152,134 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
               ),
               SliverList(
-                delegate: SliverChildListDelegate(<Widget>[
-                  RaisedButton(
-                    child: Text("Light Theme"),
-                    onPressed: () async {
-                      model.updateTheme("light");
-                      SharedPreferences pref =
-                          await SharedPreferences.getInstance();
-                      await pref.setString("theme", "light");
-                      restartApp();
-                    },
-                  ),
-                  RaisedButton(
-                    child: Text("Dark Theme"),
-                    onPressed: () async {
-                      model.updateTheme("dark");
-                      SharedPreferences pref =
-                          await SharedPreferences.getInstance();
-                      await pref.setString("theme", "dark");
-                      restartApp();
-                    },
-                  ),
-                ]),
+                delegate: SliverChildListDelegate(
+                  <Widget>[
+                    Card(
+                      margin: EdgeInsets.symmetric(vertical: 5.0),
+                      child: Container(
+                        padding: EdgeInsets.all(10),
+                        child: Container(
+                          padding: EdgeInsets.only(left: 7),
+                          child: Text(
+                            "Account Settings",
+                            style: TextStyle(
+                              fontSize: 20,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                      color: deviceTheme == "light"
+                          ? Theme.of(context).accentColor
+                          : Colors.grey[900],
+                    ),
+                    Container(
+                      margin: EdgeInsets.symmetric(vertical: 3.0),
+                      color: deviceTheme == "light"
+                          ? Colors.white
+                          : Colors.grey[800],
+                      child: ListTile(
+                        title: Text("User Name"),
+                        subtitle: Text(model.authenticatedUser.displayName),
+                        trailing: IconButton(
+                          icon: Icon(Icons.edit),
+                          onPressed: () {},
+                        ),
+                      ),
+                    ),
+                    Container(
+                      margin: EdgeInsets.symmetric(vertical: 3.0),
+                      color: deviceTheme == "light"
+                          ? Colors.white
+                          : Colors.grey[800],
+                      child: ListTile(
+                        title: Text("Change Password"),
+                        trailing: IconButton(
+                          icon: Icon(Icons.edit),
+                          onPressed: () {},
+                        ),
+                      ),
+                    ),
+                    Card(
+                      margin: EdgeInsets.symmetric(vertical: 5.0),
+                      child: Container(
+                        padding: EdgeInsets.all(10),
+                        child: Container(
+                          padding: EdgeInsets.only(left: 7.0),
+                          child: Text(
+                            "Display",
+                            style: TextStyle(
+                              fontSize: 20,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                      color: deviceTheme == "light"
+                          ? Theme.of(context).accentColor
+                          : Colors.grey[900],
+                    ),
+                    Container(
+                      margin: EdgeInsets.symmetric(vertical: 3.0),
+                      color: deviceTheme == "light"
+                          ? Colors.white
+                          : Colors.grey[800],
+                      child: SwitchListTile(
+                        activeColor: Theme.of(context).accentColor,
+                        onChanged: (bool value) async {
+                          if (!value) {
+                            model.updateTheme("light");
+                            SharedPreferences pref =
+                                await SharedPreferences.getInstance();
+                            await pref.setString("theme", "light");
+                            restartApp();
+                          } else {
+                            model.updateTheme("dark");
+                            SharedPreferences pref =
+                                await SharedPreferences.getInstance();
+                            await pref.setString("theme", "dark");
+                            restartApp();
+                          }
+                        },
+                        value: darkThemeVal,
+                        title: Text("Dark Theme"),
+                      ),
+                    ),
+                    Card(
+                      margin: EdgeInsets.symmetric(vertical: 5.0),
+                      child: Container(
+                        padding: EdgeInsets.all(10),
+                        child: Container(
+                          padding: EdgeInsets.only(left: 7.0),
+                          child: Text(
+                            "Manage Your Data",
+                            style: TextStyle(
+                              fontSize: 20,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                      color: deviceTheme == "light"
+                          ? Theme.of(context).accentColor
+                          : Colors.grey[900],
+                    ),
+                    Container(
+                      margin: EdgeInsets.symmetric(vertical: 3.0),
+                      color: deviceTheme == "light"
+                          ? Colors.white
+                          : Colors.grey[800],
+                      child: ListTile(
+                        title: Text("Clear All Expenses"),
+                        subtitle: Text("Warning: This action is permanent."),
+                        trailing: IconButton(
+                          icon: Icon(Icons.delete),
+                          onPressed: () {},
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),

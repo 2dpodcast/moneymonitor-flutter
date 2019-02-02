@@ -120,6 +120,7 @@ class ExpenseTile extends StatelessWidget {
       onDismissed: (direction) {
         deleteExpense(expense.key);
       },
+      direction: DismissDirection.endToStart,
       dismissThresholds: {DismissDirection.endToStart: 0.6},
       background: Container(
         color: deviceTheme == "light" ? Colors.red : Colors.red[700],
