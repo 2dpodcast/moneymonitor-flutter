@@ -6,6 +6,7 @@ import 'package:money_monitor/scoped_models/main.dart';
 import 'package:money_monitor/pages/login.dart';
 import 'package:money_monitor/pages/home.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:money_monitor/pages/welcome_screen.dart';
 
 final FirebaseAuth _auth = FirebaseAuth.instance;
 String deviceTheme = "light";
@@ -88,7 +89,7 @@ Widget _authenticateUser(Function loginUser) {
           //Fetch User Data
           print(user.displayName);
           loginUser(user.displayName, user.uid, user.email, user.photoUrl);
-          return HomePage();
+          return WelcomeScreen();
         }
         return LoginScreen();
       }

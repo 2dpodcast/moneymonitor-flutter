@@ -356,7 +356,6 @@ class _AddExpenseState extends State<AddExpense> {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
     return ScopedModelDescendant<MainModel>(
       builder: (BuildContext context, _, MainModel model) {
         return Scaffold(

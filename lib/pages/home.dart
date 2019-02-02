@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'package:money_monitor/scoped_models/main.dart';
 import 'package:money_monitor/models/category.dart';
@@ -7,9 +6,8 @@ import 'package:money_monitor/main.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:money_monitor/widgets/navigation/side_drawer.dart';
 import 'package:money_monitor/widgets/expenses_builder.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:money_monitor/pages/add_expense.dart';
-import 'package:google_sign_in/google_sign_in.dart';
+import 'package:money_monitor/pages/settings.dart';
 
 List<Category> categories;
 
@@ -25,7 +23,7 @@ class _HomePageState extends State<HomePage> {
 
   final _widgetOptions = [
     ExpensesList(),
-    ProfilePage(),
+    SettingsPage(),
   ];
 
   @override
@@ -54,10 +52,10 @@ class _HomePageState extends State<HomePage> {
           ? FloatingActionButton.extended(
               onPressed: () {
                 Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => AddExpense(),
-                        ),
-                      );
+                  MaterialPageRoute(
+                    builder: (context) => AddExpense(),
+                  ),
+                );
               },
               backgroundColor: Theme.of(context).primaryColorLight,
               elevation: 5.0,
@@ -112,47 +110,6 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
       ),
-    );
-  }
-}
-
-class ProfilePage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return ScopedModelDescendant<MainModel>(
-      builder: (BuildContext context, Widget widget, MainModel model) {
-        return Column(
-          children: <Widget>[
-            RaisedButton(
-              child: Text("Sign Out"),
-              onPressed: ()  async {
-                await FirebaseAuth.instance.signOut();
-                await GoogleSignIn().signOut();
-                model.logoutUser();
-                restartApp();
-              },
-            ),
-            RaisedButton(
-              child: Text("Light Theme"),
-              onPressed: () async {
-                model.updateTheme("light");
-                SharedPreferences pref = await SharedPreferences.getInstance();
-                await pref.setString("theme", "light");
-                restartApp();
-              },
-            ),
-            RaisedButton(
-              child: Text("Dark Theme"),
-              onPressed: () async {
-                model.updateTheme("dark");
-                SharedPreferences pref = await SharedPreferences.getInstance();
-                await pref.setString("theme", "dark");
-                restartApp();
-              },
-            ),
-          ],
-        );
-      },
     );
   }
 }

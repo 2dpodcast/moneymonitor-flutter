@@ -267,17 +267,14 @@ mixin UserModel on CombinedModel {
     return _authUser;
   }
 
-  void setDisplayName(String name) {
-    _newName = name;
-  }
-
-  void updateUserName() {
+  void updateUserName(String newName) {
     _authUser = User(
-        displayName: _newName,
-        uid: _authUser.uid,
-        photoUrl: _authUser.photoUrl,
-        email: _authUser.email);
-    _newName = null;
+      displayName: newName,
+      uid: _authUser.uid,
+      photoUrl: _authUser.photoUrl,
+      email: _authUser.email,
+    );
+    notifyListeners();
   }
 
   void logoutUser() {
