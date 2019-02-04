@@ -19,6 +19,8 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   bool _showSignUp = false;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> _resetFormKey = GlobalKey<FormState>();
+  String _resetFormData = "";
   final Map<String, String> _formData = {
     "email": null,
     "password": null,
@@ -38,7 +40,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
   void _authenticateWithEmailandPassword(String email, String password) async {
     try {
-      await _auth.signInWithEmailAndPassword(email: email.trim(), password: password);
+      await _auth.signInWithEmailAndPassword(
+          email: email.trim(), password: password);
     } catch (e) {
       String errorMessage = e.message;
       print(errorMessage);
@@ -218,6 +221,183 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
+  _buildSaveButton() {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(100),
+        color: deviceTheme == "light"
+            ? Theme.of(context).accentColor
+            : Colors.grey[900],
+      ),
+      child: MaterialButton(
+        onPressed: () async {
+          if (!_resetFormKey.currentState.validate()) {
+            return "";
+          }
+          _resetFormKey.currentState.save();
+          await FirebaseAuth.instance
+              .sendPasswordResetEmail(email: _resetFormData);
+          Navigator.of(context).pop();
+          showDialog(
+            context: context,
+            builder: (context) {
+              return AlertDialog(
+                title: Text("Reset Password"),
+                content: Text(
+                    "If an account exists with the email provided a reset link will be sent to that email."),
+                actions: <Widget>[
+                  FlatButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: Text("Okay"),
+                  ),
+                ],
+              );
+            },
+          );
+        },
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Icon(
+              Icons.send,
+              color: Colors.white,
+            ),
+            SizedBox(
+              width: 10,
+            ),
+            Text(
+              "Send",
+              style: TextStyle(
+                color: Colors.white,
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  _buildCancelButton() {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(100),
+        color: deviceTheme == "light"
+            ? Theme.of(context).accentColor
+            : Colors.grey[900],
+      ),
+      child: MaterialButton(
+        onPressed: () {
+          Navigator.of(context).pop();
+        },
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Icon(
+              Icons.cancel,
+              color: Colors.white,
+            ),
+            SizedBox(
+              width: 10,
+            ),
+            Text(
+              "Cancel",
+              style: TextStyle(
+                color: Colors.white,
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  _buildResetDialog() {
+    return Dialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12.0),
+      ),
+      child: Container(
+        height: 200,
+        width: 500,
+        child: Column(
+          children: <Widget>[
+            SizedBox(
+              height: 20,
+            ),
+            Text(
+              "Reset Password",
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 25,
+              ),
+            ),
+            SizedBox(
+              height: 15,
+            ),
+            Card(
+              clipBehavior: Clip.none,
+              elevation: 3.0,
+              margin: EdgeInsets.symmetric(
+                horizontal: 10.0,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(30.0),
+              ),
+              child: Form(
+                key: _resetFormKey,
+                child: TextFormField(
+                  onSaved: (String value) => _resetFormData = value,
+                  validator: (String value) {
+                    if (value.isEmpty ||
+                        !RegExp(r"[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?")
+                            .hasMatch(value)) {
+                      return "Please enter a valid email address.";
+                    }
+                  },
+                  decoration: InputDecoration(
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 20.0,
+                      vertical: 15.0,
+                    ),
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide.none,
+                      borderRadius: BorderRadius.circular(30.0),
+                    ),
+                    hintText: "Email",
+                    hintStyle: TextStyle(
+                      fontWeight: FontWeight.w600,
+                    ),
+                    hasFloatingPlaceholder: true,
+                    prefix: Text("  "),
+                    filled: true,
+                    fillColor: deviceTheme == "light"
+                        ? Colors.white
+                        : Colors.grey[600],
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(
+              height: 15,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                _buildSaveButton(),
+                SizedBox(
+                  width: 10,
+                ),
+                _buildCancelButton()
+              ],
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final targetWidth = MediaQuery.of(context).size.width > 550.0
@@ -269,14 +449,6 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           ),
           body: Container(
-            // decoration: BoxDecoration(
-            //   gradient: LinearGradient(
-            //     begin: Alignment.topCenter,
-            //     end: Alignment.bottomCenter,
-            //     stops: [0.1, 0.9],
-            //     colors: [Colors.white, Colors.blue[200]],
-            //   ),
-            // ),
             child: Center(
               child: SingleChildScrollView(
                 child: Container(
@@ -351,6 +523,18 @@ class _LoginScreenState extends State<LoginScreen> {
                               ],
                             ),
                           ),
+                        ),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        FlatButton(
+                          child: Text("Reset Password"),
+                          onPressed: () {
+                            showDialog(
+                              context: context,
+                              builder: (context) => _buildResetDialog(),
+                            );
+                          },
                         ),
                       ],
                     ),

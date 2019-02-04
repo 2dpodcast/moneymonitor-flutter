@@ -15,12 +15,173 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
+  final GlobalKey<FormState> _nameFormKey = GlobalKey<FormState>();
+  String _nameFormData;
   bool darkThemeVal;
 
   @override
   void initState() {
     super.initState();
+    _nameFormData = "";
     darkThemeVal = deviceTheme == "light" ? false : true;
+  }
+
+  _buildSaveButton(Function changeName) {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(100),
+        color: deviceTheme == "light"
+            ? Theme.of(context).accentColor
+            : Colors.grey[900],
+      ),
+      child: MaterialButton(
+        onPressed: () {
+          if (!_nameFormKey.currentState.validate()) {
+            return "";
+          }
+          _nameFormKey.currentState.save();
+          changeName(_nameFormData);
+          Navigator.of(context).pop();
+        },
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Icon(
+              Icons.check,
+              color: Colors.white,
+            ),
+            SizedBox(
+              width: 10,
+            ),
+            Text(
+              "Save",
+              style: TextStyle(
+                color: Colors.white,
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  _buildCancelButton() {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(100),
+        color: deviceTheme == "light"
+            ? Theme.of(context).accentColor
+            : Colors.grey[900],
+      ),
+      child: MaterialButton(
+        onPressed: () {
+          Navigator.of(context).pop();
+        },
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Icon(
+              Icons.cancel,
+              color: Colors.white,
+            ),
+            SizedBox(
+              width: 10,
+            ),
+            Text(
+              "Cancel",
+              style: TextStyle(
+                color: Colors.white,
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  _buildNameDialog(Function changeName) {
+    return Dialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12.0),
+      ),
+      child: Container(
+        height: 200,
+        width: 500,
+        child: Column(
+          children: <Widget>[
+            SizedBox(
+              height: 20,
+            ),
+            Text(
+              "Change Name",
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 25,
+              ),
+            ),
+            SizedBox(
+              height: 15,
+            ),
+            Card(
+              clipBehavior: Clip.none,
+              elevation: 3.0,
+              margin: EdgeInsets.symmetric(
+                horizontal: 10.0,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(30.0),
+              ),
+              child: Form(
+                key: _nameFormKey,
+                child: TextFormField(
+                  onSaved: (String value) => _nameFormData = value,
+                  validator: (String value) {
+                    if (value.length == 0) {
+                      return "Please enter a name to continue";
+                    }
+                  },
+                  decoration: InputDecoration(
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 20.0,
+                      vertical: 15.0,
+                    ),
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide.none,
+                      borderRadius: BorderRadius.circular(30.0),
+                    ),
+                    hintText: "Display Name",
+                    hintStyle: TextStyle(
+                      fontWeight: FontWeight.w600,
+                    ),
+                    hasFloatingPlaceholder: true,
+                    prefix: Text("  "),
+                    filled: true,
+                    fillColor: deviceTheme == "light"
+                        ? Colors.white
+                        : Colors.grey[600],
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(
+              height: 15,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                _buildSaveButton(changeName),
+                SizedBox(
+                  width: 10,
+                ),
+                _buildCancelButton()
+              ],
+            )
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -183,7 +344,13 @@ class _SettingsPageState extends State<SettingsPage> {
                         subtitle: Text(model.authenticatedUser.displayName),
                         trailing: IconButton(
                           icon: Icon(Icons.edit),
-                          onPressed: () {},
+                          onPressed: () {
+                            showDialog(
+                              context: context,
+                              builder: (context) =>
+                                  _buildNameDialog(model.changeUserName),
+                            );
+                          },
                         ),
                       ),
                     ),
@@ -193,10 +360,25 @@ class _SettingsPageState extends State<SettingsPage> {
                           ? Colors.white
                           : Colors.grey[800],
                       child: ListTile(
-                        title: Text("Change Password"),
+                        title: Text("Reset Password"),
                         trailing: IconButton(
-                          icon: Icon(Icons.edit),
-                          onPressed: () {},
+                          icon: Icon(MdiIcons.restore),
+                          onPressed: () async {
+                            FirebaseUser user =
+                                await FirebaseAuth.instance.currentUser();
+                            await FirebaseAuth.instance
+                                .sendPasswordResetEmail(email: user.email);
+                            Scaffold.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                    "Password reset sent to registered email address."),
+                                backgroundColor: deviceTheme == "light"
+                                    ? Colors.blueAccent
+                                    : Colors.blue[800],
+                                
+                              ),
+                            );
+                          },
                         ),
                       ),
                     ),
@@ -289,39 +471,3 @@ class _SettingsPageState extends State<SettingsPage> {
     ;
   }
 }
-
-/*
-Column(
-          children: <Widget>[
-            RaisedButton(
-              child: Text("Sign Out"),
-              onPressed: ()  async {
-                await FirebaseAuth.instance.signOut();
-                await GoogleSignIn().signOut();
-                model.logoutUser();
-                restartApp();
-              },
-            ),
-            RaisedButton(
-              child: Text("Light Theme"),
-              onPressed: () async {
-                model.updateTheme("light");
-                SharedPreferences pref = await SharedPreferences.getInstance();
-                await pref.setString("theme", "light");
-                restartApp();
-              },
-            ),
-            RaisedButton(
-              child: Text("Dark Theme"),
-              onPressed: () async {
-                model.updateTheme("dark");
-                SharedPreferences pref = await SharedPreferences.getInstance();
-                await pref.setString("theme", "dark");
-                restartApp();
-              },
-            ),
-          ],
-        );
-
-
-*/

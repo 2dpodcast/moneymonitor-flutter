@@ -87,7 +87,6 @@ Widget _authenticateUser(Function loginUser) {
           dynamic user = snapshot.data;
 
           //Fetch User Data
-          print(user.displayName);
           loginUser(user.displayName, user.uid, user.email, user.photoUrl);
           return WelcomeScreen();
         }

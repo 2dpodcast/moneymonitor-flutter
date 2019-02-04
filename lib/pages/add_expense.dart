@@ -233,7 +233,6 @@ class _AddExpenseState extends State<AddExpense> {
           _formKey.currentState.save();
 
           String category = _categoryVal == "0" ? "" : _categoryVal;
-          Navigator.of(context).pop();
           addExpense(
             title: _formData["title"],
             amount: _formData['amount'],
@@ -242,7 +241,7 @@ class _AddExpenseState extends State<AddExpense> {
             category: category,
             context: context,
           );
-          // TODO Save Data to firebase then set locally
+          Navigator.of(context).pop();
         },
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,

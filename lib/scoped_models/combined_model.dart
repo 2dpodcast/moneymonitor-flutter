@@ -6,7 +6,7 @@ import 'package:money_monitor/models/category.dart';
 import 'package:flutter/material.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:firebase_database/firebase_database.dart';
-import 'package:money_monitor/pages/home.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 final List<Category> defaultCategories = [
   Category("1", "Bills", MdiIcons.fileDocument),
@@ -265,6 +265,14 @@ mixin ExpensesModel on CombinedModel {
 mixin UserModel on CombinedModel {
   User get authenticatedUser {
     return _authUser;
+  }
+
+  void changeUserName(String name) async {
+    FirebaseUser user = await FirebaseAuth.instance.currentUser();
+    UserUpdateInfo updates = UserUpdateInfo();
+    updates.displayName = name;
+    await user.updateProfile(updates);
+    updateUserName(name);
   }
 
   void updateUserName(String newName) {

@@ -4,7 +4,7 @@ class User {
   final String email;
   final String photoUrl;
   final String uid;
-
+  
   User({
     this.displayName,
     this.email,
