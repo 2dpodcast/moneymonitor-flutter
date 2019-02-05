@@ -36,7 +36,6 @@ mixin CombinedModel on Model {
   Preferences _userPreferences;
   String _sortBy = "date";
   String _searchQuery = "";
-  String _theme = "light";
 
   bool get syncStatus {
     return _synced;
@@ -92,6 +91,25 @@ mixin FilterModel on CombinedModel {
 
   void updateSort(String value) {
     _sortBy = value;
+    notifyListeners();
+  }
+
+  void updateCurrency(String currency) async {
+    DatabaseReference ref = FirebaseDatabase.instance
+        .reference()
+        .child('users/${_authUser.uid}/preferences/currency');
+    String value;
+    if(currency == "£") {
+      value = "en-gb";
+    } else if(currency == "\$") {
+      value = "en";
+    } else if(currency == "€") {
+      value = "fr";
+    }
+
+    await ref.set(value);
+    
+    _userPreferences.currency = currency;
     notifyListeners();
   }
 
@@ -173,6 +191,16 @@ mixin ExpensesModel on CombinedModel {
   void setExpenses(List<Expense> expenses) {
     _expenses = expenses;
     _lastUpdated = DateTime.now();
+    notifyListeners();
+  }
+
+  void clearExpenses() async {
+    DatabaseReference ref = FirebaseDatabase.instance
+        .reference()
+        .child('users/${_authUser.uid}/expenses');
+    await ref.remove();
+
+    _expenses = [];
     notifyListeners();
   }
 

@@ -375,7 +375,6 @@ class _SettingsPageState extends State<SettingsPage> {
                                 backgroundColor: deviceTheme == "light"
                                     ? Colors.blueAccent
                                     : Colors.blue[800],
-                                
                               ),
                             );
                           },
@@ -434,6 +433,85 @@ class _SettingsPageState extends State<SettingsPage> {
                         child: Container(
                           padding: EdgeInsets.only(left: 7.0),
                           child: Text(
+                            "Preferences",
+                            style: TextStyle(
+                              fontSize: 20,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                      color: deviceTheme == "light"
+                          ? Theme.of(context).accentColor
+                          : Colors.grey[900],
+                    ),
+                    Container(
+                      margin: EdgeInsets.symmetric(vertical: 3.0),
+                      color: deviceTheme == "light"
+                          ? Colors.white
+                          : Colors.grey[800],
+                      child: ListTile(
+                        title: Text("Currency"),
+                        subtitle: Text(model.userCurrency),
+                        trailing: IconButton(
+                          icon: Icon(Icons.edit),
+                          onPressed: () {
+                            showModalBottomSheet(
+                              context: context,
+                              builder: (context) {
+                                return Container(
+                                  height: 200,
+                                  child: ListView(
+                                    children: <Widget>[
+                                      RadioListTile(
+                                        groupValue: model.userCurrency,
+                                        value: "£",
+                                        title: Text("Pounds (£)"),
+                                        activeColor:
+                                            Theme.of(context).accentColor,
+                                        onChanged: (String value) {
+                                          model.updateCurrency(value);
+                                          Navigator.of(context).pop();
+                                        },
+                                      ),
+                                      RadioListTile(
+                                        groupValue: model.userCurrency,
+                                        value: "\$",
+                                        title: Text("Dollars (\$)"),
+                                        activeColor:
+                                            Theme.of(context).accentColor,
+                                        onChanged: (String value) {
+                                          model.updateCurrency(value);
+                                          Navigator.of(context).pop();
+                                        },
+                                      ),
+                                      RadioListTile(
+                                        groupValue: model.userCurrency,
+                                        value: "€",
+                                        title: Text("Euros (€)"),
+                                        activeColor:
+                                            Theme.of(context).accentColor,
+                                        onChanged: (String value) {
+                                          model.updateCurrency(value);
+                                          Navigator.of(context).pop();
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                    Card(
+                      margin: EdgeInsets.symmetric(vertical: 5.0),
+                      child: Container(
+                        padding: EdgeInsets.all(10),
+                        child: Container(
+                          padding: EdgeInsets.only(left: 7.0),
+                          child: Text(
                             "Manage Your Data",
                             style: TextStyle(
                               fontSize: 20,
@@ -453,10 +531,44 @@ class _SettingsPageState extends State<SettingsPage> {
                           : Colors.grey[800],
                       child: ListTile(
                         title: Text("Clear All Expenses"),
-                        subtitle: Text("Warning: This action is permanent."),
+                        subtitle: model.allExpenses.length == 0
+                            ? Text("No expenses found.")
+                            : Text("Warning: This action is permanent."),
                         trailing: IconButton(
                           icon: Icon(Icons.delete),
-                          onPressed: () {},
+                          onPressed: model.allExpenses.length == 0
+                              ? null
+                              : () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (context) {
+                                      return AlertDialog(
+                                        title: Text("Delete All Expenses"),
+                                        content: Text(
+                                            "Are you sure you want to delete all expenses. Warning this action is irreversible."),
+                                        actions: <Widget>[
+                                          FlatButton(
+                                            child: Text(
+                                              "Delete All",
+                                              style:
+                                                  TextStyle(color: Colors.red),
+                                            ),
+                                            onPressed: () {
+                                              model.clearExpenses();
+                                              Navigator.of(context).pop();
+                                            },
+                                          ),
+                                          FlatButton(
+                                            child: Text("Cancel"),
+                                            onPressed: () {
+                                              Navigator.of(context).pop();
+                                            },
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  );
+                                },
                         ),
                       ),
                     ),

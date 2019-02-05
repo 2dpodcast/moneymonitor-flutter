@@ -1,4 +1,4 @@
-package com.example.moneymonitor;
+package com.alingam.moneymonitor;
 
 import android.os.Bundle;
 import io.flutter.app.FlutterActivity;
