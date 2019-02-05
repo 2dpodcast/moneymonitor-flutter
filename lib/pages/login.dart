@@ -28,6 +28,7 @@ class _LoginScreenState extends State<LoginScreen> {
   };
 
   void _authenticateWithGoogle() async {
+    await GoogleSignIn().signOut();
     final GoogleSignInAccount googleUser = await _googleSignIn.signIn();
     final GoogleSignInAuthentication googleAuth =
         await googleUser.authentication;

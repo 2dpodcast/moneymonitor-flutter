@@ -99,16 +99,16 @@ mixin FilterModel on CombinedModel {
         .reference()
         .child('users/${_authUser.uid}/preferences/currency');
     String value;
-    if(currency == "£") {
+    if (currency == "£") {
       value = "en-gb";
-    } else if(currency == "\$") {
+    } else if (currency == "\$") {
       value = "en";
-    } else if(currency == "€") {
+    } else if (currency == "€") {
       value = "fr";
     }
 
     await ref.set(value);
-    
+
     _userPreferences.currency = currency;
     notifyListeners();
   }
@@ -122,7 +122,11 @@ mixin FilterModel on CombinedModel {
   }
 
   String get userCurrency {
-    return _userPreferences.currency;
+    if (_userPreferences != null) {
+      return _userPreferences.currency;
+    } else {
+      return null;
+    }
   }
 
   void updateTheme(String theme) {

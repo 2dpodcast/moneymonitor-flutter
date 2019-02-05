@@ -4,6 +4,7 @@ class User {
   final String email;
   final String photoUrl;
   final String uid;
+  bool firstRun;
   
   User({
     this.displayName,
@@ -11,4 +12,8 @@ class User {
     this.photoUrl,
     this.uid,
   });
+
+  set updateFirstRun(bool value) {
+    firstRun = value;
+  }
 }

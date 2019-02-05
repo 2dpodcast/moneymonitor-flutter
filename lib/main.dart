@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:scoped_model/scoped_model.dart';
+import 'dart:async';
+import 'dart:core';
 
 import 'package:money_monitor/scoped_models/main.dart';
 import 'package:money_monitor/pages/login.dart';
-import 'package:money_monitor/pages/home.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:money_monitor/pages/welcome_screen.dart';
 
 final FirebaseAuth _auth = FirebaseAuth.instance;
 String deviceTheme = "light";
+bool firstRun;
 
 final ThemeData lightTheme = ThemeData(
   brightness: Brightness.light,
@@ -19,19 +22,18 @@ final ThemeData lightTheme = ThemeData(
 );
 
 final ThemeData darkTheme = ThemeData(
-  brightness: Brightness.dark,
-  primaryColor: Colors.grey[700],
-  primaryColorLight: Colors.grey[850],
-  accentColor: Colors.blue,
-  textSelectionHandleColor: Colors.blue
-);
+    brightness: Brightness.dark,
+    primaryColor: Colors.grey[700],
+    primaryColorLight: Colors.grey[850],
+    accentColor: Colors.blue,
+    textSelectionHandleColor: Colors.blue);
 
- restartApp() {
+restartApp() {
   main();
 }
 
 logout() {
-  if(deviceTheme == "light") {
+  if (deviceTheme == "light") {
     runApp(MyApp(lightTheme));
   } else {
     runApp(MyApp(darkTheme));
@@ -41,12 +43,11 @@ logout() {
 void main() async {
   SharedPreferences pref = await SharedPreferences.getInstance();
   String theme = (pref.getString("theme") ?? "light");
-  print(theme);
   deviceTheme = theme;
-  if(theme == "dark") {
-      runApp(MyApp(darkTheme));
+  if (theme == "dark") {
+    runApp(MyApp(darkTheme));
   } else {
-      runApp(MyApp(lightTheme));
+    runApp(MyApp(lightTheme));
   }
 }
 
@@ -59,7 +60,6 @@ class MyApp extends StatefulWidget {
   }
 }
 
-
 class _MyAppState extends State<MyApp> {
   MainModel model = MainModel();
 
@@ -69,14 +69,14 @@ class _MyAppState extends State<MyApp> {
       model: model,
       child: MaterialApp(
         title: 'Money Monitor',
-        home: _authenticateUser(model.loginUser),
+        home: _authenticateUser(model.loginUser, model),
         theme: widget.theme,
       ),
     );
   }
 }
 
-Widget _authenticateUser(Function loginUser) {
+Widget _authenticateUser(Function loginUser, MainModel model) {
   return StreamBuilder<FirebaseUser>(
     stream: _auth.onAuthStateChanged,
     builder: (BuildContext context, snapshot) {
@@ -95,6 +95,7 @@ Widget _authenticateUser(Function loginUser) {
     },
   );
 }
+
 
 Widget _buildSplashScreen() {
   return Scaffold(

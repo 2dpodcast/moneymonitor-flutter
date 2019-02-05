@@ -225,8 +225,8 @@ class _SettingsPageState extends State<SettingsPage> {
                                   size: 30,
                                 ),
                                 onPressed: () async {
-                                  await FirebaseAuth.instance.signOut();
                                   await GoogleSignIn().signOut();
+                                  await FirebaseAuth.instance.signOut();
                                   model.logoutUser();
                                   restartApp();
                                 },
@@ -452,56 +452,60 @@ class _SettingsPageState extends State<SettingsPage> {
                           : Colors.grey[800],
                       child: ListTile(
                         title: Text("Currency"),
-                        subtitle: Text(model.userCurrency),
+                        subtitle: Text(model.userCurrency != null
+                            ? model.userCurrency
+                            : "Loading preferences"),
                         trailing: IconButton(
                           icon: Icon(Icons.edit),
-                          onPressed: () {
-                            showModalBottomSheet(
-                              context: context,
-                              builder: (context) {
-                                return Container(
-                                  height: 200,
-                                  child: ListView(
-                                    children: <Widget>[
-                                      RadioListTile(
-                                        groupValue: model.userCurrency,
-                                        value: "£",
-                                        title: Text("Pounds (£)"),
-                                        activeColor:
-                                            Theme.of(context).accentColor,
-                                        onChanged: (String value) {
-                                          model.updateCurrency(value);
-                                          Navigator.of(context).pop();
-                                        },
-                                      ),
-                                      RadioListTile(
-                                        groupValue: model.userCurrency,
-                                        value: "\$",
-                                        title: Text("Dollars (\$)"),
-                                        activeColor:
-                                            Theme.of(context).accentColor,
-                                        onChanged: (String value) {
-                                          model.updateCurrency(value);
-                                          Navigator.of(context).pop();
-                                        },
-                                      ),
-                                      RadioListTile(
-                                        groupValue: model.userCurrency,
-                                        value: "€",
-                                        title: Text("Euros (€)"),
-                                        activeColor:
-                                            Theme.of(context).accentColor,
-                                        onChanged: (String value) {
-                                          model.updateCurrency(value);
-                                          Navigator.of(context).pop();
-                                        },
-                                      ),
-                                    ],
-                                  ),
-                                );
-                              },
-                            );
-                          },
+                          onPressed: model.userCurrency == null
+                              ? null
+                              : () {
+                                  showModalBottomSheet(
+                                    context: context,
+                                    builder: (context) {
+                                      return Container(
+                                        height: 200,
+                                        child: ListView(
+                                          children: <Widget>[
+                                            RadioListTile(
+                                              groupValue: model.userCurrency,
+                                              value: "£",
+                                              title: Text("Pounds (£)"),
+                                              activeColor:
+                                                  Theme.of(context).accentColor,
+                                              onChanged: (String value) {
+                                                model.updateCurrency(value);
+                                                Navigator.of(context).pop();
+                                              },
+                                            ),
+                                            RadioListTile(
+                                              groupValue: model.userCurrency,
+                                              value: "\$",
+                                              title: Text("Dollars (\$)"),
+                                              activeColor:
+                                                  Theme.of(context).accentColor,
+                                              onChanged: (String value) {
+                                                model.updateCurrency(value);
+                                                Navigator.of(context).pop();
+                                              },
+                                            ),
+                                            RadioListTile(
+                                              groupValue: model.userCurrency,
+                                              value: "€",
+                                              title: Text("Euros (€)"),
+                                              activeColor:
+                                                  Theme.of(context).accentColor,
+                                              onChanged: (String value) {
+                                                model.updateCurrency(value);
+                                                Navigator.of(context).pop();
+                                              },
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    },
+                                  );
+                                },
                         ),
                       ),
                     ),

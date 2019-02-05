@@ -12,7 +12,8 @@ class ExpenseTile extends StatelessWidget {
   final String currency;
   final Function expenseCategory;
   final Function deleteExpense;
-  ExpenseTile(this.expense, this.index, this.expenseCategory, this.currency, this.deleteExpense);
+  ExpenseTile(this.expense, this.index, this.expenseCategory, this.currency,
+      this.deleteExpense);
 
   _buildModelSheet(BuildContext context, Category category) {
     return Container(
@@ -60,7 +61,7 @@ class ExpenseTile extends StatelessWidget {
             ),
             child: Text(
               currency +
-                  (double.parse(expense.amount) / 1000).toStringAsFixed(2),
+                  (double.parse(expense.amount) / 100).toStringAsFixed(2),
               style: TextStyle(
                 color: Colors.white,
               ),
@@ -68,23 +69,28 @@ class ExpenseTile extends StatelessWidget {
           ),
           expense.note != ""
               ? Expanded(
+                  flex: 2,
                   child: Container(
-                    padding: EdgeInsets.all(10.0),
-                    child: Text(
-                      expense.note,
-                      style: TextStyle(
-                        fontSize: 20.0,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                      textAlign: TextAlign.justify,
-                      maxLines: 8,
-                    ),
-                  ),
+                      padding: EdgeInsets.all(20.0),
+                      child: ListView(
+                        children: <Widget>[
+                          Text(
+                            expense.note,
+                            style: TextStyle(
+                              fontSize: 20.0,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.justify,
+                            maxLines: 8,
+                          ),
+                        ],
+                      )),
                 )
               : Container(),
           Expanded(
+            flex: 1,
             child: Align(
-              alignment: Alignment.bottomCenter,
+              alignment: Alignment.center,
               child: ButtonBar(
                 alignment: MainAxisAlignment.center,
                 children: <Widget>[
@@ -155,7 +161,10 @@ class ExpenseTile extends StatelessWidget {
               title: Text("Delete"),
               actions: <Widget>[
                 MaterialButton(
-                  child: Text("Delete"),
+                  child: Text(
+                    "Delete",
+                    style: TextStyle(color: Colors.red),
+                  ),
                   onPressed: () {
                     shouldDelete = true;
                     Navigator.of(context).pop();
