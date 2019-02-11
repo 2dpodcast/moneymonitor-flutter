@@ -24,4 +24,14 @@ class Expense {
     createdAt = data['createdAt'].toString();
     note = data['note'];
   }
+
+  Map<String, dynamic> toJson() => {
+    'title': title,
+    'category': category,
+    'amount': amount,
+    'createdAt': createdAt,
+    'note': note,
+    'key': key,
+  };
+
 }

@@ -9,7 +9,6 @@ import 'package:money_monitor/main.dart';
 import 'dart:core';
 import 'dart:async';
 
-
 class ExpenseList extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {
@@ -42,7 +41,8 @@ class _ExpenseListState extends State<ExpenseList> {
     Duration difference = DateTime.now().difference(lastUpdate);
     if (difference.inMinutes < 10) {
       Scaffold.of(context).showSnackBar(SnackBar(
-        backgroundColor: deviceTheme == "light" ? Colors.blueAccent : Colors.blue[800],
+        backgroundColor:
+            deviceTheme == "light" ? Colors.blueAccent : Colors.blue[800],
         content: Text(
             "Next update available in ${10 - difference.inMinutes} minutes."),
         action: SnackBarAction(
@@ -69,7 +69,8 @@ class _ExpenseListState extends State<ExpenseList> {
       });
       setExpenses(expenses);
       Scaffold.of(context).showSnackBar(SnackBar(
-        backgroundColor: Colors.blueAccent,
+        backgroundColor:
+            deviceTheme == "light" ? Colors.blueAccent : Colors.blue[800],
         content: Text("Next update available in 10 minutes."),
         action: SnackBarAction(
           onPressed: () {
@@ -101,7 +102,9 @@ class _ExpenseListState extends State<ExpenseList> {
           child: CustomScrollView(
             slivers: <Widget>[
               SliverAppBar(
-                backgroundColor: deviceTheme == "light" ? Theme.of(context).accentColor :  Colors.grey[900],
+                backgroundColor: deviceTheme == "light"
+                    ? Theme.of(context).accentColor
+                    : Colors.grey[900],
                 automaticallyImplyLeading: false,
                 pinned: false,
                 floating: false,
@@ -140,7 +143,9 @@ class _ExpenseListState extends State<ExpenseList> {
                                   fontWeight: FontWeight.w600,
                                 ),
                                 filled: true,
-                                fillColor: deviceTheme == "light" ? Colors.white : Colors.grey[600],
+                                fillColor: deviceTheme == "light"
+                                    ? Colors.white
+                                    : Colors.grey[600],
                                 prefixIcon: IconButton(
                                   icon: Icon(Icons.menu),
                                   onPressed: () {
@@ -187,7 +192,7 @@ class _ExpenseListState extends State<ExpenseList> {
                                 width: 10.0,
                               ),
                               Text(
-                                "${model.userCurrency}${model.userCurrency == "€" ? total.toStringAsFixed(2).replaceAll(".", ",")  : total.toStringAsFixed(2)}",
+                                "${model.userCurrency}${model.userCurrency == "€" ? total.toStringAsFixed(2).replaceAll(".", ",") : total.toStringAsFixed(2)}",
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 30.0,
@@ -197,11 +202,10 @@ class _ExpenseListState extends State<ExpenseList> {
                             ],
                           ),
                           SizedBox(
-                            height: 20,
+                            height: 10,
                           ),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: <Widget>[
                               Text(
                                 "Currently sorting by ",
@@ -217,6 +221,30 @@ class _ExpenseListState extends State<ExpenseList> {
                                   color: Colors.white,
                                   fontSize: 17,
                                   fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 10,),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: <Widget>[
+                              MaterialButton(
+                                onPressed: () {},
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: <Widget>[
+                                    Icon(
+                                      Icons.pie_chart,
+                                      color: Colors.white,
+                                    ),
+                                    SizedBox(width: 5.0),
+                                    Text(
+                                      "Overview",
+                                      style: TextStyle(color: Colors.white),
+                                    ),
+                                  ],
                                 ),
                               ),
                               MaterialButton(
@@ -253,8 +281,12 @@ class _ExpenseListState extends State<ExpenseList> {
               SliverList(
                 delegate: SliverChildBuilderDelegate(
                   (BuildContext context, int index) {
-                    return ExpenseTile(expenses[index], index,
-                        model.expenseCategory, model.userCurrency, model.deleteExpense);
+                    return ExpenseTile(
+                        expenses[index],
+                        index,
+                        model.expenseCategory,
+                        model.userCurrency,
+                        model.deleteExpense);
                   },
                   childCount: expenses.length,
                 ),

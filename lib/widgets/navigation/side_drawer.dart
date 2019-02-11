@@ -3,14 +3,18 @@ import 'package:money_monitor/scoped_models/main.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'package:money_monitor/models/category.dart';
 import 'package:money_monitor/main.dart';
+import 'package:date_range_picker/date_range_picker.dart' as DateRangePicker;
 
 class SideDrawer extends StatefulWidget {
   final Function updateCategoryFilter;
   final Function updateSort;
   final String sortByVal;
+  final DateTime startDate;
+  final DateTime endDate;
   final List<Category> allCategories;
   SideDrawer(this.updateCategoryFilter, this.updateSort, this.sortByVal,
-      this.allCategories);
+      this.allCategories, this.startDate, this.endDate);
+
   @override
   State<StatefulWidget> createState() {
     return _SideDrawerState();
@@ -20,12 +24,18 @@ class SideDrawer extends StatefulWidget {
 class _SideDrawerState extends State<SideDrawer> {
   String _sortByValue;
   List<Category> categories;
+  DateTime _startDate;
+  DateTime _endDate;
   bool clearAllButton = true;
 
   @override
   void initState() {
     _sortByValue = widget.sortByVal;
     categories = widget.allCategories;
+    _startDate = widget.startDate == null ? DateTime.now() : widget.startDate;
+    _endDate = widget.endDate == null
+        ? DateTime.now().add(new Duration(days: 7))
+        : widget.endDate;
     super.initState();
   }
 
@@ -71,12 +81,54 @@ class _SideDrawerState extends State<SideDrawer> {
                     ],
                   ),
                   decoration: BoxDecoration(
-                    color: deviceTheme == "light" ? Theme.of(context).primaryColorLight : Colors.grey[900],
+                    color: deviceTheme == "light"
+                        ? Theme.of(context).primaryColorLight
+                        : Colors.grey[900],
                   ),
                 ),
               ),
+              ListTile(
+                leading: Icon(Icons.calendar_today),
+                title: Row(
+                  children: <Widget>[
+                    Text("Date Range"),
+                    SizedBox(
+                      width: 55,
+                    ),
+                    IconButton(
+                      icon: Icon(
+                        Icons.edit,
+                        size: 20.0,
+                      ),
+                      onPressed: () async {
+                        final List<DateTime> range =
+                            await DateRangePicker.showDatePicker(
+                          context: context,
+                          initialFirstDate: _startDate,
+                          initialLastDate: _endDate,
+                          firstDate: DateTime(2000),
+                          lastDate: DateTime(3000),
+                        );
+
+                        if (range != null && range.length == 2) {
+                          model.updateDateRange(range[0], range[1]);
+                        }
+                      },
+                    ),
+                    IconButton(
+                      icon: Icon(
+                        Icons.clear,
+                        size: 20.0,
+                      ),
+                      onPressed: () {
+                        model.updateDateRange(null, null);
+                      },
+                    ),
+                  ],
+                ),
+              ),
               ExpansionTile(
-                initiallyExpanded: true,
+                initiallyExpanded: false,
                 title: Text("Sort By"),
                 leading: Icon(
                   (Icons.sort),

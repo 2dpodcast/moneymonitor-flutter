@@ -36,7 +36,7 @@ class _HomePageState extends State<HomePage> {
       builder: (BuildContext context, Widget widget, MainModel model) {
         categories = model.allCategories;
         return SideDrawer(model.updateCategoryFilter, model.updateSort,
-            model.sortBy, model.allCategories);
+            model.sortBy, model.allCategories, model.startDate, model.endDate);
       },
     );
   }

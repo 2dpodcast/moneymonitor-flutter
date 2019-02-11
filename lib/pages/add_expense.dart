@@ -232,7 +232,7 @@ class _AddExpenseState extends State<AddExpense> {
 
           _formKey.currentState.save();
 
-          String category = _categoryVal == "0" ? "" : _categoryVal;
+          String category = _categoryVal == "0" ? "6" : _categoryVal;
           addExpense(
             title: _formData["title"],
             amount: _formData['amount'],

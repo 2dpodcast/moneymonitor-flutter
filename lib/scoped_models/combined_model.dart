@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'dart:convert';
 
 final List<Category> defaultCategories = [
   Category("1", "Bills", MdiIcons.fileDocument),
@@ -14,6 +15,7 @@ final List<Category> defaultCategories = [
   Category("3", "Food", MdiIcons.foodForkDrink),
   Category("4", "Leisure", MdiIcons.shopping),
   Category("5", "Debt", Icons.monetization_on),
+  Category("6", "Miscellaneous", MdiIcons.cashRegister),
 ];
 
 final ThemeData lightTheme = ThemeData(
@@ -36,6 +38,8 @@ mixin CombinedModel on Model {
   Preferences _userPreferences;
   String _sortBy = "date";
   String _searchQuery = "";
+  DateTime startDate;
+  DateTime endDate;
 
   bool get syncStatus {
     return _synced;
@@ -94,6 +98,12 @@ mixin FilterModel on CombinedModel {
     notifyListeners();
   }
 
+  void updateDateRange(DateTime start, DateTime end) {
+    startDate = start;
+    endDate = end;
+    notifyListeners();
+  }
+
   void updateCurrency(String currency) async {
     DatabaseReference ref = FirebaseDatabase.instance
         .reference()
@@ -126,6 +136,15 @@ mixin FilterModel on CombinedModel {
       return _userPreferences.currency;
     } else {
       return null;
+    }
+  }
+
+  String formatDate(DateTime date) {
+    List<String> _date = date.toIso8601String().substring(0, 10).split("-");
+    if(_userPreferences.currency == '\$') {
+      return "${_date[1]}-${_date[2]}-${_date[0]}";
+    } else {
+      return "${_date[2]}-${_date[1]}-${_date[0]}";
     }
   }
 
@@ -172,7 +191,19 @@ mixin ExpensesModel on CombinedModel {
       },
     );
 
-    List<Expense> finalOutput = output.where((expense) {
+    List<Expense> rangeFilter = output;
+
+    if (startDate != null && endDate != null) {
+      rangeFilter = output.where((expense) {
+        int expenseDate = int.parse(expense.createdAt);
+        int _startDate = startDate.millisecondsSinceEpoch;
+        int _endDate = endDate.millisecondsSinceEpoch;
+
+        return expenseDate >= _startDate && expenseDate <= _endDate;
+      }).toList();
+    }
+
+    List<Expense> finalOutput = rangeFilter.where((expense) {
       return expense.title.toLowerCase().contains(_searchQuery) ||
           expense.note.toLowerCase().contains(_searchQuery);
     }).toList();
@@ -195,6 +226,23 @@ mixin ExpensesModel on CombinedModel {
   void setExpenses(List<Expense> expenses) {
     _expenses = expenses;
     _lastUpdated = DateTime.now();
+    // Testing Backup Feature!
+    // List<String> jsonList = [];
+    // String jv = jsonEncode(_expenses);
+    // print("!!!!!!!!!!!!");
+    // List<Expense> list = [];
+    // print(jv);
+    // List<dynamic> a = jsonDecode(jv);
+    // a.forEach((val) {
+    //   Map<String, dynamic>  help = {};
+    //   val.forEach((key, value) {
+    //     help[key] = value;
+    //   });
+    //   print(help);
+    //   list.add(Expense.fromJson(help["key"], help));
+    // });
+
+    // print(list[0].title);
     notifyListeners();
   }
 
