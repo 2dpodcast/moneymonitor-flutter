@@ -6,6 +6,7 @@ import 'package:scoped_model/scoped_model.dart';
 import 'package:money_monitor/scoped_models/main.dart';
 import 'package:money_monitor/widgets/expenses/expense_tile.dart';
 import 'package:money_monitor/main.dart';
+import 'package:money_monitor/pages/expense_overview.dart';
 import 'dart:core';
 import 'dart:async';
 
@@ -225,12 +226,20 @@ class _ExpenseListState extends State<ExpenseList> {
                               ),
                             ],
                           ),
-                          SizedBox(height: 10,),
+                          SizedBox(
+                            height: 10,
+                          ),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: <Widget>[
                               MaterialButton(
-                                onPressed: () {},
+                                onPressed: () {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (context) => ExpenseOverview(),
+                                    ),
+                                  );
+                                },
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   mainAxisSize: MainAxisSize.min,
