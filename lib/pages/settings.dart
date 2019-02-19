@@ -576,6 +576,71 @@ class _SettingsPageState extends State<SettingsPage> {
                         ),
                       ),
                     ),
+                    Container(
+                      margin: EdgeInsets.symmetric(vertical: 3.0),
+                      color: deviceTheme == "light"
+                          ? Colors.white
+                          : Colors.grey[800],
+                      child: ListTile(
+                        title: Text("Backup All Expenses"),
+                        subtitle: model.allExpenses.length == 0
+                            ? Text("No expenses found.")
+                            : Text("Save expenses locally."),
+                        trailing: IconButton(
+                          icon: Icon(Icons.save),
+                          onPressed: model.allExpenses.length == 0
+                              ? null
+                              : () {
+                                  model.backupExpenses();
+                                },
+                        ),
+                      ),
+                    ),
+                    Container(
+                      margin: EdgeInsets.symmetric(vertical: 3.0),
+                      color: deviceTheme == "light"
+                          ? Colors.white
+                          : Colors.grey[800],
+                      child: ListTile(
+                        title: Text("Restore All Expenses"),
+                        subtitle: model.allExpenses.length == 0
+                            ? Text("No expenses found.")
+                            : Text("Load expenses from file."),
+                        trailing: IconButton(
+                          icon: Icon(Icons.restore),
+                          onPressed: () {
+                            showDialog(
+                              context: context,
+                              builder: (context) {
+                                return AlertDialog(
+                                  title: Text("Restore Expenses"),
+                                  content: Text(
+                                      "Are you sure you want to overwrite all expenses. Warning this action is irreversible."),
+                                  actions: <Widget>[
+                                    FlatButton(
+                                      child: Text(
+                                        "Restore",
+                                        style: TextStyle(color: Colors.red),
+                                      ),
+                                      onPressed: () {
+                                        model.restoreExpense();
+                                        Navigator.of(context).pop();
+                                      },
+                                    ),
+                                    FlatButton(
+                                      child: Text("Cancel"),
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                      },
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                          },
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),

@@ -5,7 +5,7 @@ import 'package:money_monitor/models/category.dart';
 import 'package:money_monitor/main.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:money_monitor/widgets/navigation/side_drawer.dart';
-import 'package:money_monitor/widgets/expenses_builder.dart';
+import 'package:money_monitor/widgets/expenses/expenses_builder.dart';
 import 'package:money_monitor/pages/add_expense.dart';
 import 'package:money_monitor/pages/settings.dart';
 

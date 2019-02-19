@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:money_monitor/main.dart';
-import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:scoped_model/scoped_model.dart';
 import 'package:money_monitor/scoped_models/main.dart';
-import 'package:money_monitor/models/category.dart';
-import 'package:random_color/random_color.dart';
-import 'dart:math' as math;
+import 'package:money_monitor/widgets/categories/category_summary.dart';
+import 'package:money_monitor/utils/data_cruncher.dart';
 
 class ExpenseOverview extends StatefulWidget {
   @override
@@ -15,120 +13,166 @@ class ExpenseOverview extends StatefulWidget {
 }
 
 class _ExpenseOverviewState extends State<ExpenseOverview> {
-  String getRandomColor() {
-    // String col =
-    //     ((math.Random().nextDouble() * 0xFFFFFF).toInt() << 0).toString();
-    // print(col);
-    // return col;
-    RandomColor _randomColor = RandomColor();
-    Color _color = _randomColor.randomColor(colorHue: ColorHue.blue);
-    String c = _color
-        .toString()
-        .replaceFirst("Color", "")
-        .replaceFirst("(", "")
-        .replaceFirst(")", "")
-        .replaceFirst("0xff", "");
-    print("#" + c);
-    return "#$c";
-  }
-
-  List<charts.Series<CategoryData, int>> _createSampleData() {
-    final data = [
-      new CategoryData(
-          0, 56, charts.Color.fromHex(code: getRandomColor()), "Food", "£456"),
-      new CategoryData(
-          1, 75, charts.Color.fromHex(code: getRandomColor()), "Bills", "£1567"),
-      new CategoryData(
-          2, 25, charts.Color.fromHex(code: getRandomColor()), "Leisure", "£20"),
-      new CategoryData(
-          3, 5, charts.Color.fromHex(code: getRandomColor()), "Miscellaneous","£8"),
-    ];
-
-    return [
-      new charts.Series<CategoryData, int>(
-        id: 'Categories',
-        domainFn: (CategoryData category, _) => category.id,
-        measureFn: (CategoryData category, _) => category.count,
-        colorFn: (CategoryData category, _) => category.color,
-        data: data,
-        labelAccessorFn: (CategoryData row, _) => '${row.name} ${row.total}',
-      )
-    ];
-  }
+  final dataCruncher = DataCruncher();
+  String timeSummary = "week";
 
   @override
   Widget build(BuildContext context) {
     return ScopedModelDescendant<MainModel>(
       builder: (BuildContext context, Widget widget, MainModel model) {
+        List topCategories = dataCruncher.getTopCategories(
+            model.allCategories, model.allExpenses, model.userCurrency);
+
         return Scaffold(
           body: GestureDetector(
             onTap: () => FocusScope.of(context).requestFocus(
                   FocusNode(),
                 ),
-            child: CustomScrollView(
-              slivers: <Widget>[
-                SliverAppBar(
-                  automaticallyImplyLeading: false,
-                  backgroundColor: deviceTheme == "light"
-                      ? Theme.of(context).accentColor
-                      : Colors.grey[900],
-                  expandedHeight: 300,
-                  flexibleSpace: FlexibleSpaceBar(
-                    background: Container(
-                      child: SafeArea(
-                        bottom: false,
-                        top: true,
-                        child: Column(
-                          children: <Widget>[
-                            Container(
-                              padding:
-                                  EdgeInsets.only(left: 20, right: 20, top: 30),
-                              child: Text(
-                                "Expense Overview",
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 30.0,
-                                  fontWeight: FontWeight.w400,
+            child: SafeArea(
+              child: CustomScrollView(
+                slivers: <Widget>[
+                  SliverAppBar(
+                    automaticallyImplyLeading: false,
+                    backgroundColor: deviceTheme == "light"
+                        ? Theme.of(context).accentColor
+                        : Colors.grey[900],
+                    expandedHeight: 240,
+                    flexibleSpace: FlexibleSpaceBar(
+                      background: Container(
+                        child: SafeArea(
+                          bottom: false,
+                          top: true,
+                          child: Column(
+                            children: <Widget>[
+                              Container(
+                                padding: EdgeInsets.only(
+                                    left: 20, right: 20, top: 30),
+                                child: Text(
+                                  "Expense Overview",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 35.0,
+                                    fontWeight: FontWeight.w400,
+                                  ),
                                 ),
                               ),
-                            ),
-                            SizedBox(
-                              height: 20,
-                            ),
-                            Container(
-                              height: 200,
-                              child: charts.PieChart(
-                                _createSampleData(),
-                                animate: true,
-                                defaultRenderer: new charts.ArcRendererConfig(
-                                  layoutPaintOrder: 1,
-                                  arcRendererDecorators: [
-                                    charts.ArcLabelDecorator(
-                                      labelPosition:
-                                          charts.ArcLabelPosition.auto,
-                                      leaderLineStyleSpec: charts.ArcLabelLeaderLineStyleSpec(color: charts.Color.white, length: 20, thickness: 1),
-                                      insideLabelStyleSpec:
-                                          charts.TextStyleSpec(
-                                        color: charts.Color.white,
-                                        fontSize: 15,
+                              SizedBox(
+                                height: 20,
+                              ),
+                              Column(
+                                children: <Widget>[
+                                  Text(
+                                    "Total Expenses:",
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 30.0,
+                                      fontWeight: FontWeight.w400,
+                                    ),
+                                  ),
+                                  Text(
+                                    "${model.userCurrency}${dataCruncher.getTotal(model.allExpenses).toStringAsFixed(2)}",
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 30.0,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(
+                                height: 10,
+                              ),
+                              GestureDetector(
+                                onTap: () {
+                                  if (timeSummary == "month") {
+                                    setState(() {
+                                      timeSummary = "week";
+                                    });
+                                  } else if (timeSummary == "week") {
+                                    setState(() {
+                                      timeSummary = "month";
+                                    });
+                                  }
+                                },
+                                child: Column(
+                                  children: <Widget>[
+                                    // Toggle month//week/year
+                                    Text(
+                                      "Total This ${timeSummary == "month" ? "Month" : "Week"}:",
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 30.0,
+                                        fontWeight: FontWeight.w400,
                                       ),
-                                      outsideLabelStyleSpec:
-                                          charts.TextStyleSpec(
-                                        color: charts.Color.white,
-                                        fontSize: 15,
+                                    ),
+                                    Text(
+                                      timeSummary == "month"
+                                          ? "${model.userCurrency}${dataCruncher.getMonthTotal(model.allExpenses).toStringAsFixed(2)}"
+                                          : "${model.userCurrency}${dataCruncher.getWeekTotal(model.allExpenses).toStringAsFixed(2)}",
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 30.0,
+                                        fontWeight: FontWeight.w700,
                                       ),
                                     ),
                                   ],
                                 ),
                               ),
-                            )
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-              ],
+                  SliverPersistentHeader(
+                    pinned: true,
+                    delegate: _SliverAppBarDelegate(
+                        child: PreferredSize(
+                      preferredSize: Size.fromHeight(50.0),
+                      child: Container(
+                        color: deviceTheme == "light"
+                            ? Theme.of(context).accentColor
+                            : Colors.grey[900],
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            SizedBox(
+                              height: 10,
+                            ),
+                            Row(
+                              mainAxisSize: MainAxisSize.max,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: <Widget>[
+                                Text(
+                                  'Breakdown by Category',
+                                  style: TextStyle(
+                                      color: Colors.white, fontSize: 25.0),
+                                ),
+                              ],
+                            ),
+                            SizedBox(
+                              height: 10,
+                            ),
+                          ],
+                        ),
+                      ),
+                    )),
+                  ),
+                  SliverPadding(
+                    padding: EdgeInsets.symmetric(vertical: 5),
+                  ),
+                  SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (BuildContext context, int index) {
+                        return CategorySummary(topCategories[index].name,
+                            topCategories[index].total, model.userCurrency);
+                      },
+                      childCount: topCategories.length,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         );
@@ -137,12 +181,64 @@ class _ExpenseOverviewState extends State<ExpenseOverview> {
   }
 }
 
-class CategoryData {
-  final int id;
-  final int count;
-  final charts.Color color;
-  final String name;
-  final String total;
+class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
+  final PreferredSize child;
 
-  CategoryData(this.id, this.count, this.color, this.name, this.total);
+  _SliverAppBarDelegate({this.child});
+
+  @override
+  Widget build(
+      BuildContext context, double shrinkOffset, bool overlapsContent) {
+    // TODO: implement build
+    return child;
+  }
+
+  @override
+  // TODO: implement maxExtent
+  double get maxExtent => child.preferredSize.height;
+
+  @override
+  // TODO: implement minExtent
+  double get minExtent => child.preferredSize.height;
+
+  @override
+  bool shouldRebuild(SliverPersistentHeaderDelegate oldDelegate) {
+    // TODO: implement shouldRebuild
+    return false;
+  }
 }
+/*
+
+Container(
+                              height: 200,
+                              child: charts.PieChart(
+                                seriesData,
+                                animate: true,
+                                defaultRenderer: new charts.ArcRendererConfig(
+                                  layoutPaintOrder: 1,
+                                  arcRendererDecorators: [
+                                    charts.ArcLabelDecorator(
+                                      labelPosition:
+                                          charts.ArcLabelPosition.auto,
+                                      leaderLineStyleSpec:
+                                          charts.ArcLabelLeaderLineStyleSpec(
+                                              color: charts.Color.white,
+                                              length: 15,
+                                              thickness: 1),
+                                      insideLabelStyleSpec:
+                                          charts.TextStyleSpec(
+                                        color: charts.Color.white,
+                                        fontSize: 8,
+                                      ),
+                                      outsideLabelStyleSpec:
+                                          charts.TextStyleSpec(
+                                        color: charts.Color.white,
+                                        fontSize: 8,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            )
+
+*/

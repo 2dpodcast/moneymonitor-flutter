@@ -4,7 +4,6 @@ import 'package:scoped_model/scoped_model.dart';
 import 'package:money_monitor/scoped_models/main.dart';
 import 'package:money_monitor/models/category.dart';
 import 'package:money_monitor/models/expense.dart';
-import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 
 class EditExpense extends StatefulWidget {
   final Expense expense;

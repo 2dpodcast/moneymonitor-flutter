@@ -3,7 +3,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:money_monitor/models/expense.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'package:money_monitor/scoped_models/main.dart';
-import 'package:money_monitor/widgets/expense_list.dart';
+import 'package:money_monitor/widgets/expenses/expense_list.dart';
 import 'package:money_monitor/models/category.dart';
 
 class ExpensesList extends StatelessWidget {

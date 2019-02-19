@@ -7,7 +7,9 @@ import 'package:flutter/material.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:path_provider/path_provider.dart';
 import 'dart:convert';
+import 'dart:io';
 
 final List<Category> defaultCategories = [
   Category("1", "Bills", MdiIcons.fileDocument),
@@ -141,7 +143,7 @@ mixin FilterModel on CombinedModel {
 
   String formatDate(DateTime date) {
     List<String> _date = date.toIso8601String().substring(0, 10).split("-");
-    if(_userPreferences.currency == '\$') {
+    if (_userPreferences.currency == '\$') {
       return "${_date[1]}-${_date[2]}-${_date[0]}";
     } else {
       return "${_date[2]}-${_date[1]}-${_date[0]}";
@@ -226,10 +228,20 @@ mixin ExpensesModel on CombinedModel {
   void setExpenses(List<Expense> expenses) {
     _expenses = expenses;
     _lastUpdated = DateTime.now();
+    notifyListeners();
+  }
+
+  void backupExpenses() async {
     // Testing Backup Feature!
-    // List<String> jsonList = [];
-    // String jv = jsonEncode(_expenses);
-    // print("!!!!!!!!!!!!");
+    List<String> jsonList = [];
+    String jv = jsonEncode(_expenses);
+    final directory = await getApplicationDocumentsDirectory();
+    print(directory.path);
+    File expenseBackup = File("${directory.path}/expenseBackup.json");
+    expenseBackup.writeAsString(jv).catchError((error) {
+      print(error);
+    });
+
     // List<Expense> list = [];
     // print(jv);
     // List<dynamic> a = jsonDecode(jv);
@@ -241,9 +253,25 @@ mixin ExpensesModel on CombinedModel {
     //   print(help);
     //   list.add(Expense.fromJson(help["key"], help));
     // });
+  }
 
-    // print(list[0].title);
-    notifyListeners();
+  void restoreExpense() async {
+    final directory = await getApplicationDocumentsDirectory();
+    print(directory.path);
+    File expenseBackup = File("${directory.path}/expenseBackup.json");
+    String data = await expenseBackup.readAsString();
+    List<Expense> list = [];
+    print(data);
+    List<dynamic> a = jsonDecode(data);
+    a.forEach((val) {
+      Map<String, dynamic> help = {};
+      val.forEach((key, value) {
+        help[key] = value;
+      });
+      print(help);
+      list.add(Expense.fromJson(help["key"], help));
+    });
+    _expenses = list;
   }
 
   void clearExpenses() async {

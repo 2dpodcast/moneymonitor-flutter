@@ -234,11 +234,30 @@ class _ExpenseListState extends State<ExpenseList> {
                             children: <Widget>[
                               MaterialButton(
                                 onPressed: () {
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (context) => ExpenseOverview(),
-                                    ),
-                                  );
+                                  if (model.allExpenses.length > 0) {
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (context) => ExpenseOverview(),
+                                      ),
+                                    );
+                                  } else {
+                                    Scaffold.of(context).showSnackBar(
+                                      SnackBar(
+                                        backgroundColor: deviceTheme == "light"
+                                            ? Colors.blueAccent
+                                            : Colors.blue[800],
+                                        content: Text("No expenses found."),
+                                        action: SnackBarAction(
+                                          onPressed: () {
+                                            Scaffold.of(context)
+                                                .hideCurrentSnackBar();
+                                          },
+                                          label: "Dismiss",
+                                          textColor: Colors.white,
+                                        ),
+                                      ),
+                                    );
+                                  }
                                 },
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
