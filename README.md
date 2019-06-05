@@ -16,6 +16,6 @@ If you just want to build the apk to install on your android device:
 2) Run `flutter build apk` from the command line to generate an APK file in the build folder which you can install on your device. Alternativley with your device plugged in you with USB debugging enabled, run `flutter install` to build and push the apk to your device automatically.
 
 ### [Screenshots](https://imgur.com/a/9Xa4E14)
-<img align="right" src="https://imgur.com/22aExh8.png" width="250">
-<img align="right" src="https://imgur.com/3EyEGKQ.png" width="250">
-<img align="right" src="https://imgur.com/jYOfp4J.png" width="250">
+<img align="left" src="https://imgur.com/22aExh8.png" width="250">
+<img align="left" src="https://imgur.com/3EyEGKQ.png" width="250">
+<img align="left" src="https://imgur.com/jYOfp4J.png" width="250">
