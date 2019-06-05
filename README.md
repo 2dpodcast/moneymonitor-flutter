@@ -5,7 +5,9 @@ Expense tracking app built using flutter. Add, edit and track your expenses from
 ### Build Instructions
 
 #### Requirements
-Requires the Flutter SDK to be installed as well as the android SDK tools. Instructions on how to setup your device for flutter development can be found at the [official flutter install guide](https://flutter.dev/docs/get-started/install)
+* Requires the Flutter SDK to be installed as well as the android SDK tools. Instructions on how to setup your device for flutter development can be found at the [official flutter install guide](https://flutter.dev/docs/get-started/install)
+
+* You will need to setup your own firebase realtime database and app from the firebase console to develop the app. Instructions on how to do this are available when creating a new project on the firebase site. Once setup grab the `google-services.json` file from the console and place it in `android/app` directory. (Instructions for IOS available in the firebase documentation)
 
 1) Clone repository to your device and navigate to the newly cloned folder.
 2) Open a terminal window at the root of the cloned folder and run `flutter pub get` to download all dependencies 
