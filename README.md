@@ -4,10 +4,14 @@ Expense tracking app built using flutter. Add, edit and track your expenses from
 
 ### Build Instructions
 
+If you just want to try the app on your device then head to the [releases](https://github.com/AnushanLingam/moneymonitor-flutter/releases/tag/0.1.0) tab to download an APK for your android device.
+
+The following instructions are for working with the source code. They require you to setup a new firebase project with realtime database and authentication as well as the use of cloud functions. 
+
 #### Requirements
 * Requires the Flutter SDK to be installed as well as the android SDK tools. Instructions on how to setup your device for flutter development can be found at the [official flutter install guide](https://flutter.dev/docs/get-started/install)
 
-* You will need to setup your own firebase realtime database and app from the firebase console to develop the app. Instructions on how to do this are available when creating a new project on the firebase site. Once setup grab the `google-services.json` file from the console and place it in `android/app` directory. (Instructions for IOS available in the firebase documentation)
+* You will need to setup your own firebase realtime database and app from the firebase console to develop the app. Instructions on how to do this are available when creating a new project on the firebase site. Once setup grab the `google-services.json` file from the console and place it in `android/app` directory. (Instructions for IOS available in the firebase documentation). You will then have to deploy [these](https://github.com/AnushanLingam/moneymonitor-cloudfunctions) cloud functions to handle initialisation of new users and deletion of users. Deployment instructions for cloud functions are also available in the firebase console.
 
 1) Clone repository to your device and navigate to the newly cloned folder.
 2) Open a terminal window at the root of the cloned folder and run `flutter pub get` to download all dependencies 
